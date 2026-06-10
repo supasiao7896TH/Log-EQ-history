@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Mockup - Smart Production Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background: #1e293b; }
+
+        /* ── Neumorphic สีเดิม ── */
+        .nm-bg { background-color: #eef2f9; }
+        .nm-card { background: #eef2f9; border-radius: 16px; box-shadow: 6px 6px 12px #d1d9e6, -6px -6px 12px #ffffff; }
+        .nm-inset { background: #eef2f9; border-radius: 10px; box-shadow: inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff; }
+        .nm-btn { background: #eef2f9; border-radius: 10px; box-shadow: 4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff; }
+        .nm-btn:active { box-shadow: inset 3px 3px 6px #d1d9e6, inset -3px -3px 6px #ffffff; }
+        .gradient-text { background-image: linear-gradient(to right, #3730a3, #5b21b6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+        /* ── Phone Frame ── */
+        .phone-frame {
+            width: 390px;
+            height: 844px;
+            border-radius: 48px;
+            border: 8px solid #374151;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 0 2px #1f2937, 0 30px 60px rgba(0,0,0,0.6);
+            flex-shrink: 0;
+        }
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #eef2f9;
+            position: relative;
+            scrollbar-width: none;
+        }
+        .phone-screen::-webkit-scrollbar { display: none; }
+
+        /* ── Status Bar ── */
+        .status-bar {
+            height: 44px;
+            background: #eef2f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        /* ── Bottom Nav ── */
+        .bottom-nav {
+            position: sticky;
+            bottom: 0;
+            left: 0; right: 0;
+            height: 72px;
+            background: #eef2f9;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 8px;
+            z-index: 50;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            min-width: 44px;
+            min-height: 44px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-item.active { background: rgba(99,102,241,0.12); }
+        .nav-item svg { width: 22px; height: 22px; }
+        .nav-label { font-size: 10px; font-weight: 500; }
+
+        /* ── Log Card (แทน Table Row) ── */
+        .log-card {
+            background: #eef2f9;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff;
+            margin-bottom: 10px;
+        }
+
+        /* ── Bottom Sheet ── */
+        .bottom-sheet-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            z-index: 60;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .bottom-sheet {
+            background: #eef2f9;
+            border-radius: 24px 24px 0 0;
+            max-height: 90%;
+            overflow-y: auto;
+            padding-bottom: 32px;
+        }
+        .sheet-handle {
+            width: 40px; height: 4px;
+            background: #cbd5e1;
+            border-radius: 2px;
+            margin: 12px auto 8px;
+        }
+
+        /* ── Tooltip label ── */
+        .screen-label {
+            color: #94a3b8;
+            font-size: 11px;
+            text-align: center;
+            margin-top: 10px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        /* ── Fullscreen Modal ── */
+        .fullscreen-modal {
+            position: absolute;
+            inset: 0;
+            background: #eef2f9;
+            z-index: 60;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .modal-header {
+            position: sticky;
+            top: 0;
+            background: #eef2f9;
+            z-index: 10;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        /* Scrollable container */
+        .screens-wrapper {
+            display: flex;
+            gap: 32px;
+            padding: 40px;
+            overflow-x: auto;
+            align-items: flex-start;
+        }
+        .screen-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .screen-title {
+            color: #f1f5f9;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <div class="text-center pt-8 pb-2">
+        <h1 class="text-white text-2xl font-bold">Mobile UI Mockup</h1>
+        <p class="text-slate-400 text-sm mt-1">Smart Production Assistant — Mobile Adaptation</p>
+    </div>
+
+    <div class="screens-wrapper">
+
+        <!-- ════════════════════════════════════ -->
+        <!-- SCREEN 1: Main Menu                  -->
+        <!-- ════════════════════════════════════ -->
+        <div class="screen-col">
+            <p class="screen-title">หน้าหลัก (Main Menu)</p>
+            <div class="phone-frame">
+                <div class="phone-screen">
+
+                    <!-- Status Bar -->
+                    <div class="status-bar">
+                        <span class="text-xs font-semibold text-slate-700">9:41</span>
+                        <div class="flex items-center gap-1">
+                            <svg class="w-4 h-4 text-slate-700" fill="currentColor" viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 00-6 0zm-4-4l2 2a7.074 7.074 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+                            <svg class="w-4 h-4 text-slate-700" fill="currentColor" viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                        </div>
+                    </div>
+
+                    <!-- Compact Header -->
+                    <div class="px-4 py-3" style="background:linear-gradient(rgba(238,242,249,0.95),rgba(238,242,249,0.95))">
+                        <h1 class="text-lg font-bold gradient-text leading-tight">Smart Production</h1>
+                        <p class="text-xs text-slate-400 mb-3">v7.9.15 · Assistant</p>
+
+                        <!-- Plant + Search inline -->
+                        <div class="flex gap-2">
+                            <div class="nm-inset px-3 py-2 flex items-center gap-2 flex-shrink-0" style="border-radius:10px">
+                                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                <span class="text-sm font-semibold text-slate-700">Plant 1</span>
+                                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                            <div class="nm-inset px-3 py-2 flex items-center gap-2 flex-1" style="border-radius:10px">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                <span class="text-xs text-slate-400">ค้นหาอุปกรณ์...</span>
+                            </div>
+                        </div>
+
+                        <!-- Last Entry -->
+                        <div class="nm-inset mt-3 px-3 py-2" style="border-radius:10px">
+                            <p class="text-xs text-slate-400 mb-0.5">บันทึกล่าสุด</p>
+                            <p class="text-xs text-slate-700 font-medium">PP-101A · 14:32 · รั่วที่ mechanical seal</p>
+                        </div>
+                    </div>
+
+                    <!-- Equipment Grid -->
+                    <div class="px-4 py-3 space-y-3">
+
+                        <!-- Category: PUMP -->
+                        <div class="nm-card p-3">
+                            <h3 class="text-xs font-bold text-sky-600 border-b-2 border-sky-300 pb-1.5 mb-2">PUMP</h3>
+                            <div class="grid grid-cols-3 gap-1.5">
+                                <button class="nm-btn py-2 px-1 text-xs text-slate-700 text-center rounded-lg">PP-101A</button>
+                                <button class="nm-btn py-2 px-1 text-xs text-slate-700 text-center rounded-lg">PP-101B</button>
+                                <button class="nm-btn py-2 px-1 text-xs text-slate-700 text-center rounded-lg">PP-102A</button>
+                                <button class="nm-btn py-2 px-1 text-xs text-slate-700 text-center rounded-lg">PP-102B</button>
+                                <button class="nm-btn py-2 px-1 text-xs text-slate-700 text-center rounded-lg">PP-103A</button>
+                                <button class="nm-btn py-2 px-1 text-xs text-blue-600 font-semibold text-center rounded-lg">+47 more</button>
+                            </div>
+                        </div>
+
+                        <!-- Category: AGITATOR -->
+                        <div class="nm-card p-3">
+                            <h3 class="text-xs font-bold text-orange-600 border-b-2 border-orange-300 pb-1.5 mb-2">AGITATOR</h3>
+                            <div class="grid grid-cols-3 gap-1.5">
+                                <button class="nm-btn py-2 px-1 text-xs text-slate-700 text-center rounded-lg">PJ-101</button>
+                                <button class="nm-btn py-2 px-1 text-xs text-slate-700 text-center rounded-lg">PJ-301</button>
+                                <button class="nm-btn py-2 px-1 text-xs text-slate-700 text-center rounded-lg">PJ-302</button>
+                            </div>
+                        </div>
+
+                        <!-- Category: BLOWER -->
+                        <div class="nm-card p-3">
+                            <h3 class="text-xs font-bold text-lime-600 border-b-2 border-lime-300 pb-1.5 mb-2">BLOWER, COMP.</h3>
+                            <div class="grid grid-cols-3 gap-1.5">
+                                <button class="nm-btn py-2 px-1 text-xs text-slate-700 text-center rounded-lg">PC-201A</button>
+                                <button class="nm-btn py-2 px-1 text-xs text-slate-700 text-center rounded-lg">PC-201B</button>
+                                <button class="nm-btn py-2 px-1 text-xs text-slate-700 text-center rounded-lg">PC-401</button>
+                            </div>
+                        </div>
+                        <div style="height:80px"></div>
+                    </div>
+
+                    <!-- Bottom Nav -->
+                    <div class="bottom-nav">
+                        <div class="nav-item active">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="text-indigo-600"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                            <span class="nav-label text-indigo-600">หน้าหลัก</span>
+                        </div>
+                        <div class="nav-item">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="text-slate-500"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            <span class="nav-label text-slate-500">Dashboard</span>
+                        </div>
+                        <div class="nav-item">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="text-slate-500"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                            <!-- Command Center Icon -->
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="text-slate-500" style="width:22px;height:22px;margin-top:-22px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+                            <span class="nav-label text-slate-500">Command</span>
+                        </div>
+                        <div class="nav-item">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="text-slate-500"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h4M8 7a2 2 0 012-2h4a2 2 0 012 2v8a2 2 0 01-2 2h-4a2 2 0 01-2-2z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7h2a2 2 0 012 2v8a2 2 0 01-2 2h-2"/></svg>
+                            <span class="nav-label text-slate-500">Handover</span>
+                        </div>
+                        <div class="nav-item">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="text-slate-500"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span class="nav-label text-slate-500">จัดการ</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <p class="screen-label">หน้าหลัก + Bottom Nav</p>
+        </div>
+
+        <!-- ════════════════════════════════════ -->
+        <!-- SCREEN 2: Equipment Detail           -->
+        <!-- ════════════════════════════════════ -->
+        <div class="screen-col">
+            <p class="screen-title">หน้าอุปกรณ์ (Equipment Detail)</p>
+            <div class="phone-frame">
+                <div class="phone-screen">
+                    <div class="status-bar">
+                        <span class="text-xs font-semibold text-slate-700">9:41</span>
+                        <div class="flex items-center gap-1">
+                            <svg class="w-4 h-4 text-slate-700" fill="currentColor" viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 00-6 0zm-4-4l2 2a7.074 7.074 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+                            <svg class="w-4 h-4 text-slate-700" fill="currentColor" viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+                        </div>
+                    </div>
+
+                    <!-- Header with Back -->
+                    <div class="flex items-center gap-3 px-4 py-3 sticky top-[44px] bg-[#eef2f9] z-10 border-b border-slate-200">
+                        <button class="nm-btn p-2.5 rounded-xl">
+                            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        <div>
+                            <p class="text-xs text-slate-400">PUMP</p>
+                            <h1 class="text-base font-bold text-rose-500 leading-tight">PP-101A</h1>
+                        </div>
+                        <button class="nm-btn p-2.5 rounded-xl ml-auto">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        </button>
+                    </div>
+
+                    <div class="px-4 py-3 space-y-3">
+
+                        <!-- Quick Form -->
+                        <div class="nm-card p-4">
+                            <h2 class="text-sm font-bold text-slate-700 mb-3">บันทึกข้อมูลใหม่</h2>
+
+                            <!-- Date + Shift in a row -->
+                            <div class="flex gap-2 mb-3">
+                                <div class="flex-1">
+                                    <label class="text-xs text-slate-500 block mb-1">วันที่/เวลา</label>
+                                    <div class="nm-inset px-2 py-2 text-xs text-slate-700">10/06/69 09:41</div>
+                                </div>
+                                <div class="w-20">
+                                    <label class="text-xs text-slate-500 block mb-1">กะ</label>
+                                    <div class="nm-inset px-2 py-2 text-xs text-slate-700 text-center">A ▾</div>
+                                </div>
+                            </div>
+
+                            <!-- Type -->
+                            <div class="mb-3">
+                                <label class="text-xs text-slate-500 block mb-1">ประเภท</label>
+                                <div class="nm-inset px-3 py-2 text-xs text-slate-700">Mechanical ▾</div>
+                            </div>
+
+                            <!-- Details with AI button -->
+                            <div class="mb-3">
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="text-xs text-slate-500">รายละเอียด</label>
+                                    <button class="nm-btn px-2 py-1 text-xs text-indigo-600 rounded-lg flex items-center gap-1">✨ AI</button>
+                                </div>
+                                <div class="nm-inset px-3 py-2 text-xs text-slate-400 leading-relaxed" style="min-height:64px">พิมพ์ปัญหาที่พบ...</div>
+                            </div>
+
+                            <!-- Recorder + Status in row -->
+                            <div class="flex gap-2 mb-3">
+                                <div class="flex-1">
+                                    <label class="text-xs text-slate-500 block mb-1">ผู้บันทึก</label>
+                                    <div class="nm-inset px-2 py-2 text-xs text-slate-400">ชื่อ...</div>
+                                </div>
+                                <div class="w-28">
+                                    <label class="text-xs text-slate-500 block mb-1">สถานะ</label>
+                                    <div class="nm-inset px-2 py-2 text-xs text-slate-700">Open ▾</div>
+                                </div>
+                            </div>
+
+                            <button class="nm-btn w-full py-2.5 text-sm font-bold text-blue-600 flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                                บันทึกข้อมูล
+                            </button>
+                        </div>
+
+                        <!-- AI Section — Vertical Buttons -->
+                        <div class="nm-card p-4">
+                            <h2 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                                <span>🤖</span> ผู้ช่วย AI
+                            </h2>
+                            <div class="space-y-2">
+                                <button class="nm-btn w-full py-2.5 text-sm font-bold text-sky-600 flex items-center gap-2 px-4">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"/></svg>
+                                    ขอคำแนะนำเบื้องต้น
+                                </button>
+                                <button class="nm-btn w-full py-2.5 text-sm font-bold text-amber-600 flex items-center gap-2 px-4">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    สร้างขั้นตอนความปลอดภัย
+                                </button>
+                                <button class="nm-btn w-full py-2.5 text-sm font-bold text-teal-600 flex items-center gap-2 px-4">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547"/></svg>
+                                    วิเคราะห์ปัญหา
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- History as Cards (แทน Table) -->
+                        <div class="nm-card p-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <h2 class="text-sm font-bold text-slate-700">ประวัติการบันทึก</h2>
+                                <!-- Filter chips -->
+                                <div class="flex gap-1">
+                                    <span class="badge bg-indigo-100 text-indigo-700">ทั้งหมด</span>
+                                    <span class="badge bg-slate-100 text-slate-500">Open</span>
+                                </div>
+                            </div>
+
+                            <!-- Log Card แทน Table Row -->
+                            <div class="log-card">
+                                <div class="flex justify-between items-start mb-1.5">
+                                    <div>
+                                        <span class="text-xs font-semibold text-slate-700">9 มิ.ย. 69 · 14:32</span>
+                                        <span class="ml-2 text-xs text-slate-400">กะ A</span>
+                                    </div>
+                                    <span class="badge bg-rose-100 text-rose-700">Open</span>
+                                </div>
+                                <p class="text-xs font-semibold text-sky-600 mb-1">Mechanical</p>
+                                <p class="text-xs text-slate-600 leading-relaxed">รั่วที่ mechanical seal ด้านหน้า pressure เพิ่มขึ้น...</p>
+                                <div class="flex items-center justify-between mt-2">
+                                    <span class="text-xs text-slate-400">ผู้บันทึก: สมชาย ก.</span>
+                                    <div class="flex gap-2">
+                                        <button class="text-sky-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m4 13l4-4M19 5h-4M12 19l-4-4m-4-4h12v-2"/></svg></button>
+                                        <button class="text-rose-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="log-card">
+                                <div class="flex justify-between items-start mb-1.5">
+                                    <div>
+                                        <span class="text-xs font-semibold text-slate-700">8 มิ.ย. 69 · 22:15</span>
+                                        <span class="ml-2 text-xs text-slate-400">กะ C</span>
+                                    </div>
+                                    <span class="badge bg-amber-100 text-amber-700">In Progress</span>
+                                </div>
+                                <p class="text-xs font-semibold text-sky-600 mb-1">Electrical</p>
+                                <p class="text-xs text-slate-600 leading-relaxed">Motor trip เนื่องจาก overload current สูงกว่า setpoint</p>
+                                <div class="flex items-center justify-between mt-2">
+                                    <span class="text-xs text-slate-400">ผู้บันทึก: วิชัย ม.</span>
+                                    <div class="flex gap-2">
+                                        <button class="text-sky-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m4 13l4-4M19 5h-4M12 19l-4-4m-4-4h12v-2"/></svg></button>
+                                        <button class="text-rose-400"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div style="height:20px"></div>
+                    </div>
+
+                </div>
+            </div>
+            <p class="screen-label">Card layout แทน Table</p>
+        </div>
+
+        <!-- ════════════════════════════════════ -->
+        <!-- SCREEN 3: Dashboard (Fullscreen Modal)-->
+        <!-- ════════════════════════════════════ -->
+        <div class="screen-col">
+            <p class="screen-title">Dashboard (Full-screen Modal)</p>
+            <div class="phone-frame">
+                <div class="phone-screen" style="overflow:hidden">
+
+                    <!-- Blurred background -->
+                    <div style="filter:blur(2px); pointer-events:none">
+                        <div class="status-bar"><span class="text-xs font-semibold text-slate-700">9:41</span></div>
+                        <div class="px-4 py-6 text-center"><p class="text-slate-300 text-sm">Main Menu...</p></div>
+                    </div>
+
+                    <!-- Fullscreen Modal Overlay -->
+                    <div class="fullscreen-modal">
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <button class="nm-btn p-2.5 rounded-xl flex-shrink-0">
+                                <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                            <h2 class="text-base font-bold text-slate-800">Dashboard — Plant 1</h2>
+                        </div>
+
+                        <!-- Modal Content -->
+                        <div class="px-4 py-4 space-y-4 flex-1 overflow-y-auto">
+
+                            <!-- Chart placeholder 1 -->
+                            <div class="nm-card p-4">
+                                <h3 class="text-xs font-semibold text-slate-600 text-center mb-3">5 อุปกรณ์ที่เกิดปัญหาบ่อยสุด</h3>
+                                <!-- Mock bar chart -->
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-slate-500 w-16 text-right">PP-101A</span>
+                                        <div class="flex-1 h-5 rounded-full nm-inset overflow-hidden">
+                                            <div class="h-full rounded-full bg-teal-400" style="width:85%"></div>
+                                        </div>
+                                        <span class="text-xs font-semibold text-slate-600 w-6">17</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-slate-500 w-16 text-right">PC-201A</span>
+                                        <div class="flex-1 h-5 rounded-full nm-inset overflow-hidden">
+                                            <div class="h-full rounded-full bg-teal-400" style="width:60%"></div>
+                                        </div>
+                                        <span class="text-xs font-semibold text-slate-600 w-6">12</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-slate-500 w-16 text-right">PJ-401</span>
+                                        <div class="flex-1 h-5 rounded-full nm-inset overflow-hidden">
+                                            <div class="h-full rounded-full bg-teal-400" style="width:45%"></div>
+                                        </div>
+                                        <span class="text-xs font-semibold text-slate-600 w-6">9</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-slate-500 w-16 text-right">PP-304A</span>
+                                        <div class="flex-1 h-5 rounded-full nm-inset overflow-hidden">
+                                            <div class="h-full rounded-full bg-teal-400" style="width:30%"></div>
+                                        </div>
+                                        <span class="text-xs font-semibold text-slate-600 w-6">6</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Chart placeholder 2 -->
+                            <div class="nm-card p-4">
+                                <h3 class="text-xs font-semibold text-slate-600 text-center mb-3">สัดส่วนประเภทปัญหา</h3>
+                                <!-- Mock donut via CSS -->
+                                <div class="flex items-center gap-4">
+                                    <div class="relative flex-shrink-0" style="width:80px;height:80px">
+                                        <svg viewBox="0 0 36 36" class="w-full h-full" style="transform:rotate(-90deg)">
+                                            <circle cx="18" cy="18" r="14" fill="none" stroke="#e2e8f0" stroke-width="4"/>
+                                            <circle cx="18" cy="18" r="14" fill="none" stroke="#FF6384" stroke-width="4" stroke-dasharray="35 65"/>
+                                            <circle cx="18" cy="18" r="14" fill="none" stroke="#36A2EB" stroke-width="4" stroke-dasharray="25 75" stroke-dashoffset="-35"/>
+                                            <circle cx="18" cy="18" r="14" fill="none" stroke="#FFCE56" stroke-width="4" stroke-dasharray="20 80" stroke-dashoffset="-60"/>
+                                            <circle cx="18" cy="18" r="14" fill="none" stroke="#4BC0C0" stroke-width="4" stroke-dasharray="20 80" stroke-dashoffset="-80"/>
+                                        </svg>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm flex-shrink-0" style="background:#FF6384"></span><span class="text-xs text-slate-600">Mechanical 35%</span></div>
+                                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm flex-shrink-0" style="background:#36A2EB"></span><span class="text-xs text-slate-600">Electrical 25%</span></div>
+                                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm flex-shrink-0" style="background:#FFCE56"></span><span class="text-xs text-slate-600">Process 20%</span></div>
+                                        <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm flex-shrink-0" style="background:#4BC0C0"></span><span class="text-xs text-slate-600">Instrument 20%</span></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AI Analysis -->
+                            <div class="nm-card p-4">
+                                <h3 class="text-sm font-semibold text-slate-700 mb-3 text-center">🧠 AI วิเคราะห์ภาพรวม</h3>
+                                <button class="nm-btn w-full py-2.5 text-sm font-bold text-indigo-600 flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                    เริ่มวิเคราะห์ภาพรวม
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <p class="screen-label">Full-screen Modal</p>
+        </div>
+
+        <!-- ════════════════════════════════════ -->
+        <!-- SCREEN 4: Chatbot (Bottom Sheet)     -->
+        <!-- ════════════════════════════════════ -->
+        <div class="screen-col">
+            <p class="screen-title">AI Chatbot (Bottom Sheet)</p>
+            <div class="phone-frame">
+                <div class="phone-screen" style="overflow:hidden">
+
+                    <!-- Blurred BG -->
+                    <div style="filter:blur(1px)">
+                        <div class="status-bar"><span class="text-xs font-semibold text-slate-700">9:41</span></div>
+                        <div class="px-4 py-4 space-y-3">
+                            <div class="nm-card p-4">
+                                <h3 class="text-xs font-bold text-sky-600 border-b-2 border-sky-300 pb-1.5 mb-2">PUMP</h3>
+                                <div class="grid grid-cols-3 gap-1.5">
+                                    <div class="nm-btn h-8 rounded-lg"></div>
+                                    <div class="nm-btn h-8 rounded-lg"></div>
+                                    <div class="nm-btn h-8 rounded-lg"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Floating Chat Button -->
+                    <button class="absolute bottom-24 right-4 w-14 h-14 rounded-full flex items-center justify-center z-50 nm-btn" style="animation: none">
+                        <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    </button>
+
+                    <!-- Bottom Sheet -->
+                    <div class="bottom-sheet-overlay">
+                        <div class="bottom-sheet" style="height:72%">
+                            <div class="sheet-handle"></div>
+
+                            <!-- Chat Header -->
+                            <div class="flex items-center justify-between px-4 pb-3 border-b border-slate-200">
+                                <h2 class="text-base font-bold text-slate-800">ผู้ช่วย AI อัจฉริยะ</h2>
+                                <button class="nm-btn p-2 rounded-full">
+                                    <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+
+                            <!-- Messages -->
+                            <div class="px-4 py-3 space-y-3 overflow-y-auto" style="height:calc(100% - 120px)">
+                                <!-- AI bubble -->
+                                <div class="flex gap-2 items-end">
+                                    <div class="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 text-xs">🤖</div>
+                                    <div class="nm-inset px-3 py-2 rounded-2xl rounded-bl-sm max-w-[75%]">
+                                        <p class="text-xs text-slate-700 leading-relaxed">สวัสดีครับ มีอะไรให้ช่วยเกี่ยวกับข้อมูลเครื่องจักรไหมครับ?</p>
+                                    </div>
+                                </div>
+                                <!-- User bubble -->
+                                <div class="flex gap-2 items-end justify-end">
+                                    <div class="bg-indigo-100 px-3 py-2 rounded-2xl rounded-br-sm max-w-[75%]">
+                                        <p class="text-xs text-indigo-800 leading-relaxed">PP-101A มีปัญหาบ่อยไหม?</p>
+                                    </div>
+                                </div>
+                                <!-- AI reply -->
+                                <div class="flex gap-2 items-end">
+                                    <div class="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 text-xs">🤖</div>
+                                    <div class="nm-inset px-3 py-2 rounded-2xl rounded-bl-sm max-w-[75%]">
+                                        <p class="text-xs text-slate-700 leading-relaxed">PP-101A มีการบันทึกปัญหา 17 ครั้งในช่วง 3 เดือนที่ผ่านมา ส่วนใหญ่เป็นปัญหา Mechanical seal...</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Input -->
+                            <div class="px-4 pt-2 pb-4 flex items-center gap-2 border-t border-slate-200">
+                                <div class="nm-inset flex-1 px-3 py-2.5 text-xs text-slate-400 rounded-xl">ถามคำถาม...</div>
+                                <button class="nm-btn p-2.5 rounded-xl">
+                                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <p class="screen-label">Bottom Sheet Chatbot</p>
+        </div>
+
+    </div>
+
+    <!-- Legend -->
+    <div class="px-10 pb-10">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl">
+            <div class="bg-slate-800 rounded-xl p-4">
+                <p class="text-indigo-400 font-bold text-sm mb-1">① หน้าหลัก</p>
+                <p class="text-slate-400 text-xs">Header เล็กลง · Grid 3 คอลัมน์ · Bottom Nav 5 ปุ่ม</p>
+            </div>
+            <div class="bg-slate-800 rounded-xl p-4">
+                <p class="text-rose-400 font-bold text-sm mb-1">② Equipment Detail</p>
+                <p class="text-slate-400 text-xs">Form กระชับ · Log เป็น Card · AI ปุ่มแนวตั้ง</p>
+            </div>
+            <div class="bg-slate-800 rounded-xl p-4">
+                <p class="text-teal-400 font-bold text-sm mb-1">③ Dashboard</p>
+                <p class="text-slate-400 text-xs">Full-screen Modal · Chart อยู่ใน Card เดี่ยว</p>
+            </div>
+            <div class="bg-slate-800 rounded-xl p-4">
+                <p class="text-amber-400 font-bold text-sm mb-1">④ AI Chatbot</p>
+                <p class="text-slate-400 text-xs">Bottom Sheet · ลื่นไหล · FAB button ด้านล่างขวา</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
