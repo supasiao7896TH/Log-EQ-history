@@ -1,0 +1,26 @@
+{
+  "name": "Smart Production Assistant",
+  "short_name": "Smart PA",
+  "description": "ผู้ช่วยการผลิตอัจฉริยะ - บันทึกและวิเคราะห์ประวัติอุปกรณ์",
+  "start_url": "/log-eq-history/",
+  "scope": "/log-eq-history/",
+  "display": "standalone",
+  "background_color": "#eef2f9",
+  "theme_color": "#3730a3",
+  "orientation": "portrait-primary",
+  "lang": "th",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
