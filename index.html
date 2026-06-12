@@ -42,7 +42,7 @@
         .modal-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 50; }
         .toast-notification { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); transition: bottom 0.5s ease-in-out; z-index: 100; }
         .toast-notification.show { bottom: 20px; }
-        .header-bg-isometric { background-image: linear-gradient(rgba(238, 242, 249, 0.9), rgba(238, 242, 249, 0.9)), url('https://images.unsplash.com/photo-1620221099530-51b178ab5502?q=80&w=2070&auto=format&fit=crop'); background-size: cover; background-position: center; }
+        .header-bg-isometric { background-image: linear-gradient(rgba(238,242,249,0.82), rgba(238,242,249,0.82)), url('factory-bg.png'); background-size: cover; background-position: center top; background-color: #eef2f9; }
         @keyframes breathe { 0%, 100% { transform: scale(1); box-shadow: 5px 5px 10px #d1d9e6, -5px -5px 10px #ffffff; } 50% { transform: scale(1.05); box-shadow: 8px 8px 16px #d1d9e6, -8px -8px 16px #ffffff; } }
         .breathing-button { animation: breathe 4s ease-in-out infinite; }
         #command-center-table-body tr { cursor: pointer; }
@@ -86,6 +86,12 @@
             <header class="mb-4 md:mb-8 flex flex-col gap-3 md:gap-6 header-bg-isometric rounded-2xl shadow-lg p-4 md:p-8">
                 <div class="flex items-center justify-between md:flex-col md:items-center md:gap-4">
                     <div class="md:text-center">
+                        <div class="flex items-center md:justify-center gap-2 mb-1 md:mb-2">
+                            <span class="inline-flex items-center gap-1.5 bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full border border-indigo-200 tracking-wider">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                GC-M PTA PLANT
+                            </span>
+                        </div>
                         <h1 class="text-xl md:text-5xl font-bold gradient-text leading-tight">Smart Production Assistant</h1>
                         <p class="text-gray-500 text-xs md:text-base mt-0.5 md:mt-2">v7.9.15 - IndexedDB Upgrade</p>
                     </div>
@@ -633,7 +639,7 @@
 
         function showConfirmModal(message, onConfirm) { confirmModal.innerHTML = confirmModalTemplate.innerHTML; confirmModal.querySelector('#confirm-modal-message').textContent = message; confirmModal.classList.remove('hidden'); const confirmBtn = confirmModal.querySelector('#confirm-modal-confirm-btn'); const cancelBtn = confirmModal.querySelector('#confirm-modal-cancel-btn'); const overlay = confirmModal.querySelector('.modal-overlay'); const closeModal = () => confirmModal.classList.add('hidden'); confirmBtn.onclick = () => { onConfirm(); closeModal(); }; cancelBtn.onclick = closeModal; overlay.onclick = closeModal; }
 
-        function handleEquipmentClick(event) { currentEquipmentId = event.target.dataset.eqId; views.detail.innerHTML = ''; views.detail.appendChild(detailTemplate.content.cloneNode(true)); views.detail.querySelector('#eq-title').textContent = currentEquipmentId; renderLogTable(currentEquipmentId); attachDetailViewListeners(); switchView('detail'); }
+        function handleEquipmentClick(event) { currentEquipmentId = (event.currentTarget || event.target).dataset.eqId || event.target.closest('[data-eq-id]')?.dataset.eqId; views.detail.innerHTML = ''; views.detail.appendChild(detailTemplate.content.cloneNode(true)); views.detail.querySelector('#eq-title').textContent = currentEquipmentId; renderLogTable(currentEquipmentId); attachDetailViewListeners(); switchView('detail'); }
 
         function attachDetailViewListeners() {
             views.detail.querySelector('#back-to-main-menu').addEventListener('click', () => { currentEquipmentId = null; switchView('mainMenu'); renderLastEntry(); });

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Header Mockup — GC-M PTA</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Sarabun', sans-serif; background: #eef2f9; padding: 24px; }
+
+  /* ── Option A: Deep Indigo + Purple gradient ── */
+  .header-a {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 35%, #4c1d95 70%, #2d1b69 100%);
+    border-radius: 24px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  /* ── Option B: Dark Teal + Navy ── */
+  .header-b {
+    background: linear-gradient(135deg, #0f2027 0%, #1a3a4a 40%, #203a43 70%, #0f2027 100%);
+    border-radius: 24px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  /* ── Option C: Slate + Indigo + subtle glow ── */
+  .header-c {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #312e81 80%, #0f172a 100%);
+    border-radius: 24px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glow-circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.25;
+    pointer-events: none;
+  }
+  .label { font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 24px; }
+  .neumorphic-button-dark {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 10px;
+    backdrop-filter: blur(4px);
+    transition: all 0.2s;
+  }
+  .neumorphic-button-dark:hover { background: rgba(255,255,255,0.15); }
+</style>
+</head>
+<body>
+
+<h2 class="text-slate-600 font-bold mb-4 text-lg">🎨 Mockup — เลือก Option ที่ชอบ</h2>
+
+<!-- ═══════════════════════════════════════════
+     OPTION A : Deep Indigo / Purple
+════════════════════════════════════════════ -->
+<p class="label mt-6">Option A — Deep Indigo + Purple</p>
+<div class="header-a shadow-2xl mb-10">
+  <!-- Glow accents -->
+  <div class="glow-circle w-64 h-64 bg-purple-400" style="top:-60px;right:80px;"></div>
+  <div class="glow-circle w-48 h-48 bg-indigo-400" style="bottom:-40px;left:40px;"></div>
+
+  <!-- SVG Factory -->
+  <div class="absolute inset-0 overflow-hidden opacity-20 pointer-events-none select-none">
+    <svg viewBox="0 0 900 220" preserveAspectRatio="xMaxYMax meet" class="w-full h-full">
+      <!-- Ground line -->
+      <line x1="0" y1="210" x2="900" y2="210" stroke="#a5b4fc" stroke-width="1.5"/>
+      <!-- Storage tanks -->
+      <ellipse cx="760" cy="180" rx="32" ry="12" fill="#818cf8" opacity=".6"/>
+      <rect x="728" y="140" width="64" height="40" rx="4" fill="#6366f1" opacity=".5"/>
+      <ellipse cx="760" cy="140" rx="32" ry="12" fill="#a5b4fc" opacity=".6"/>
+      <ellipse cx="820" cy="185" rx="22" ry="8" fill="#818cf8" opacity=".5"/>
+      <rect x="798" y="152" width="44" height="33" rx="3" fill="#6366f1" opacity=".4"/>
+      <ellipse cx="820" cy="152" rx="22" ry="8" fill="#a5b4fc" opacity=".5"/>
+      <!-- Distillation column 1 (tall) -->
+      <rect x="600" y="60" width="28" height="150" rx="6" fill="#818cf8" opacity=".5"/>
+      <ellipse cx="614" cy="60" rx="14" ry="5" fill="#a5b4fc" opacity=".6"/>
+      <rect x="600" y="95" width="28" height="4" fill="#c7d2fe" opacity=".5"/>
+      <rect x="600" y="125" width="28" height="4" fill="#c7d2fe" opacity=".5"/>
+      <rect x="600" y="155" width="28" height="4" fill="#c7d2fe" opacity=".5"/>
+      <!-- Distillation column 2 (medium) -->
+      <rect x="650" y="90" width="22" height="120" rx="5" fill="#7c3aed" opacity=".4"/>
+      <ellipse cx="661" cy="90" rx="11" ry="4" fill="#a78bfa" opacity=".6"/>
+      <!-- Pipes horizontal -->
+      <path d="M628 180 Q680 175 728 178" stroke="#a5b4fc" stroke-width="4" fill="none" opacity=".5"/>
+      <path d="M628 140 L650 140" stroke="#c4b5fd" stroke-width="3" fill="none" opacity=".5"/>
+      <path d="M672 140 L728 145" stroke="#c4b5fd" stroke-width="3" fill="none" opacity=".4"/>
+      <!-- Pipes vertical -->
+      <line x1="614" y1="58" x2="614" y2="25" stroke="#a5b4fc" stroke-width="2.5" opacity=".4"/>
+      <line x1="661" y1="88" x2="661" y2="55" stroke="#c4b5fd" stroke-width="2" opacity=".4"/>
+      <!-- Smoke / steam -->
+      <circle cx="614" cy="18" r="8" fill="#e0e7ff" opacity=".2"/>
+      <circle cx="622" cy="12" r="6" fill="#e0e7ff" opacity=".15"/>
+      <circle cx="608" cy="8" r="5" fill="#e0e7ff" opacity=".12"/>
+      <circle cx="661" cy="48" r="6" fill="#e0e7ff" opacity=".18"/>
+      <circle cx="668" cy="42" r="5" fill="#e0e7ff" opacity=".12"/>
+      <!-- Control room building -->
+      <rect x="530" y="155" width="55" height="55" rx="5" fill="#4338ca" opacity=".4"/>
+      <rect x="535" y="165" width="12" height="10" rx="1" fill="#bfdbfe" opacity=".5"/>
+      <rect x="553" y="165" width="12" height="10" rx="1" fill="#bfdbfe" opacity=".5"/>
+      <rect x="544" y="180" width="14" height="30" rx="2" fill="#6366f1" opacity=".5"/>
+      <!-- Pipes left side -->
+      <path d="M530 180 Q500 170 470 175" stroke="#a5b4fc" stroke-width="3" fill="none" opacity=".35"/>
+      <!-- Flare stack -->
+      <line x1="870" y1="210" x2="870" y2="100" stroke="#f59e0b" stroke-width="3" opacity=".4"/>
+      <path d="M865 100 Q870 85 875 100" fill="#fbbf24" opacity=".5"/>
+      <circle cx="870" cy="82" r="6" fill="#fde68a" opacity=".4"/>
+    </svg>
+  </div>
+
+  <!-- Content -->
+  <div class="relative z-10 flex flex-col gap-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-xs font-bold tracking-widest text-indigo-300 mb-1 uppercase">GC-M PTA Plant</p>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white leading-tight">Smart Production<br><span class="text-indigo-300">Assistant</span></h1>
+        <p class="text-indigo-400 text-sm mt-2">v7.9.15 · IndexedDB Upgrade</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="neumorphic-button-dark"><svg class="w-6 h-6 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg></button>
+        <button class="neumorphic-button-dark"><svg class="w-6 h-6 text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></button>
+        <button class="neumorphic-button-dark"><svg class="w-6 h-6 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h4M8 7a2 2 0 012-2h4a2 2 0 012 2v8a2 2 0 01-2 2h-4"/></svg></button>
+        <button class="neumorphic-button-dark"><svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></button>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 max-w-md gap-3 mt-2">
+      <div>
+        <label class="block text-xs font-medium text-indigo-300 mb-1">เลือก Plant</label>
+        <div class="bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white text-sm">Plant 1</div>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-indigo-300 mb-1">ค้นหาอุปกรณ์</label>
+        <div class="bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white/40 text-sm">พิมพ์ชื่ออุปกรณ์...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     OPTION B : Dark Teal / Navy
+════════════════════════════════════════════ -->
+<p class="label mt-2">Option B — Dark Teal + Navy (Ocean)</p>
+<div class="header-b shadow-2xl mb-10">
+  <div class="glow-circle w-72 h-72 bg-teal-400" style="top:-80px;right:60px;"></div>
+  <div class="glow-circle w-40 h-40 bg-cyan-300" style="bottom:-30px;left:80px;"></div>
+
+  <div class="absolute inset-0 overflow-hidden opacity-20 pointer-events-none select-none">
+    <svg viewBox="0 0 900 220" preserveAspectRatio="xMaxYMax meet" class="w-full h-full">
+      <line x1="0" y1="210" x2="900" y2="210" stroke="#5eead4" stroke-width="1.5"/>
+      <ellipse cx="760" cy="180" rx="32" ry="12" fill="#2dd4bf" opacity=".6"/>
+      <rect x="728" y="140" width="64" height="40" rx="4" fill="#0d9488" opacity=".5"/>
+      <ellipse cx="760" cy="140" rx="32" ry="12" fill="#5eead4" opacity=".6"/>
+      <rect x="600" y="60" width="28" height="150" rx="6" fill="#0f766e" opacity=".6"/>
+      <ellipse cx="614" cy="60" rx="14" ry="5" fill="#5eead4" opacity=".7"/>
+      <rect x="600" y="95" width="28" height="4" fill="#99f6e4" opacity=".5"/>
+      <rect x="600" y="125" width="28" height="4" fill="#99f6e4" opacity=".5"/>
+      <rect x="600" y="155" width="28" height="4" fill="#99f6e4" opacity=".5"/>
+      <rect x="650" y="90" width="22" height="120" rx="5" fill="#0e7490" opacity=".5"/>
+      <ellipse cx="661" cy="90" rx="11" ry="4" fill="#67e8f9" opacity=".6"/>
+      <path d="M628 180 Q680 175 728 178" stroke="#5eead4" stroke-width="4" fill="none" opacity=".5"/>
+      <line x1="614" y1="58" x2="614" y2="25" stroke="#5eead4" stroke-width="2.5" opacity=".4"/>
+      <circle cx="614" cy="18" r="8" fill="#ccfbf1" opacity=".2"/>
+      <circle cx="622" cy="12" r="6" fill="#ccfbf1" opacity=".15"/>
+      <rect x="530" y="155" width="55" height="55" rx="5" fill="#164e63" opacity=".5"/>
+      <rect x="535" y="165" width="12" height="10" rx="1" fill="#a5f3fc" opacity=".5"/>
+      <line x1="870" y1="210" x2="870" y2="100" stroke="#f59e0b" stroke-width="3" opacity=".5"/>
+      <circle cx="870" cy="85" r="7" fill="#fde68a" opacity=".5"/>
+    </svg>
+  </div>
+
+  <div class="relative z-10 flex flex-col gap-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-xs font-bold tracking-widest text-teal-300 mb-1 uppercase">GC-M PTA Plant</p>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white leading-tight">Smart Production<br><span class="text-teal-300">Assistant</span></h1>
+        <p class="text-teal-400 text-sm mt-2">v7.9.15 · IndexedDB Upgrade</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="bg-white/10 border border-white/20 rounded-xl p-2.5"><svg class="w-6 h-6 text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3"/></svg></button>
+        <button class="bg-white/10 border border-white/20 rounded-xl p-2.5"><svg class="w-6 h-6 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10"/></svg></button>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 max-w-md gap-3 mt-2">
+      <div>
+        <label class="block text-xs font-medium text-teal-300 mb-1">เลือก Plant</label>
+        <div class="bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white text-sm">Plant 1</div>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-teal-300 mb-1">ค้นหาอุปกรณ์</label>
+        <div class="bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white/40 text-sm">พิมพ์ชื่ออุปกรณ์...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     OPTION C : Near Black + Indigo Glow
+════════════════════════════════════════════ -->
+<p class="label mt-2">Option C — Dark Slate + Indigo Glow</p>
+<div class="header-c shadow-2xl mb-6">
+  <div class="glow-circle w-80 h-80 bg-indigo-500" style="top:-100px;right:100px;"></div>
+  <div class="glow-circle w-56 h-56 bg-violet-600" style="bottom:-60px;left:120px;"></div>
+
+  <div class="absolute inset-0 overflow-hidden opacity-25 pointer-events-none select-none">
+    <svg viewBox="0 0 900 220" preserveAspectRatio="xMaxYMax meet" class="w-full h-full">
+      <line x1="0" y1="210" x2="900" y2="210" stroke="#818cf8" stroke-width="1.5"/>
+      <ellipse cx="760" cy="180" rx="32" ry="12" fill="#6366f1" opacity=".6"/>
+      <rect x="728" y="140" width="64" height="40" rx="4" fill="#4f46e5" opacity=".5"/>
+      <ellipse cx="760" cy="140" rx="32" ry="12" fill="#818cf8" opacity=".6"/>
+      <rect x="600" y="55" width="30" height="155" rx="7" fill="#4338ca" opacity=".6"/>
+      <ellipse cx="615" cy="55" rx="15" ry="5" fill="#a5b4fc" opacity=".7"/>
+      <rect x="600" y="90" width="30" height="4" fill="#c7d2fe" opacity=".6"/>
+      <rect x="600" y="120" width="30" height="4" fill="#c7d2fe" opacity=".6"/>
+      <rect x="600" y="150" width="30" height="4" fill="#c7d2fe" opacity=".6"/>
+      <rect x="648" y="85" width="24" height="125" rx="5" fill="#3730a3" opacity=".5"/>
+      <ellipse cx="660" cy="85" rx="12" ry="4" fill="#a5b4fc" opacity=".6"/>
+      <path d="M630 180 Q680 174 728 178" stroke="#818cf8" stroke-width="4" fill="none" opacity=".5"/>
+      <line x1="615" y1="53" x2="615" y2="20" stroke="#a5b4fc" stroke-width="2.5" opacity=".5"/>
+      <circle cx="615" cy="13" r="8" fill="#e0e7ff" opacity=".25"/>
+      <circle cx="623" cy="7" r="6" fill="#e0e7ff" opacity=".18"/>
+      <rect x="528" y="150" width="58" height="60" rx="5" fill="#1e1b4b" opacity=".6"/>
+      <rect x="534" y="162" width="13" height="11" rx="1" fill="#bfdbfe" opacity=".5"/>
+      <rect x="552" y="162" width="13" height="11" rx="1" fill="#bfdbfe" opacity=".5"/>
+      <rect x="542" y="178" width="15" height="32" rx="2" fill="#3730a3" opacity=".6"/>
+      <line x1="875" y1="210" x2="875" y2="95" stroke="#f59e0b" stroke-width="3" opacity=".5"/>
+      <circle cx="875" cy="80" r="8" fill="#fde68a" opacity=".5"/>
+      <circle cx="875" cy="68" r="5" fill="#fef3c7" opacity=".3"/>
+    </svg>
+  </div>
+
+  <div class="relative z-10 flex flex-col gap-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-xs font-bold tracking-widest text-violet-300 mb-1 uppercase">GC-M PTA Plant</p>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white leading-tight">Smart Production<br><span class="bg-gradient-to-r from-indigo-300 to-violet-300 bg-clip-text text-transparent">Assistant</span></h1>
+        <p class="text-slate-400 text-sm mt-2">v7.9.15 · IndexedDB Upgrade</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="bg-white/8 border border-white/15 rounded-xl p-2.5 backdrop-blur"><svg class="w-6 h-6 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3"/></svg></button>
+        <button class="bg-white/8 border border-white/15 rounded-xl p-2.5 backdrop-blur"><svg class="w-6 h-6 text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10"/></svg></button>
+        <button class="bg-white/8 border border-white/15 rounded-xl p-2.5 backdrop-blur"><svg class="w-6 h-6 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h4"/></svg></button>
+        <button class="bg-white/8 border border-white/15 rounded-xl p-2.5 backdrop-blur"><svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></button>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 max-w-md gap-3 mt-2">
+      <div>
+        <label class="block text-xs font-medium text-violet-300 mb-1">เลือก Plant</label>
+        <div class="bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white text-sm">Plant 1</div>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-violet-300 mb-1">ค้นหาอุปกรณ์</label>
+        <div class="bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white/40 text-sm">พิมพ์ชื่ออุปกรณ์...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="text-center text-slate-400 text-sm mt-4">เลือก Option ที่ชอบแล้วบอกผมได้เลยครับ 🙏</p>
+</body>
+</html>
