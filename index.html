@@ -425,7 +425,7 @@
             excelDataMap: { date: 'O5', shiftDay: 'M9', shiftNight: 'M10', dayDetails: { start: 76, end: 117 }, nightDetails: { start: 119, end: 145 } }
         };
 
-        const IDB_CONFIG = { name: 'SmartProduction_IDB', version: 1, store: 'appData' };
+        const IDB_CONFIG = { name: 'SmartProduction_IDB', version: 2, store: 'appData' };
         const dbManager = {
             db: null,
             init: async function() { return new Promise((resolve, reject) => { const request = indexedDB.open(IDB_CONFIG.name, IDB_CONFIG.version); request.onupgradeneeded = (e) => { const db = e.target.result; if (!db.objectStoreNames.contains(IDB_CONFIG.store)) { db.createObjectStore(IDB_CONFIG.store); } }; request.onsuccess = (e) => { this.db = e.target.result; this.db.onversionchange = () => { this.db.close(); }; resolve(this.db); }; request.onerror = (e) => reject(e.target.error); request.onblocked = () => reject(new Error('IndexedDB ถูกบล็อกโดย tab อื่น กรุณาปิด tab อื่นที่ใช้แอปนี้อยู่แล้วลองใหม่')); }); },
