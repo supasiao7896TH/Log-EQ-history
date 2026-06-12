@@ -737,7 +737,47 @@
         function checkNotifications() { const allPlantLogs = getAllLogsFlat(); if (allPlantLogs.length < 5) return; const openTasks = allPlantLogs.filter(log => log.status === 'Open'); if (openTasks.length > 5) { showToast(`🔔 แจ้งเตือน: มีงานค้างสถานะ 'Open' อยู่ ${openTasks.length} รายการ`); return; } const problemCounts = allPlantLogs.reduce((acc, log) => { if (log.equipment && log.details) { const key = `${log.equipment}|${log.details.toLowerCase().substring(0, 30)}`; acc[key] = (acc[key] || 0) + 1; } return acc; }, {}); for (const key in problemCounts) { if (problemCounts[key] >= 3) { const [eqId] = key.split('|'); showToast(`⚠️ แจ้งเตือน: อุปกรณ์ ${eqId} อาจมีปัญหาเรื้อรัง`); return; } } }
 
         async function handleExportData() { const dataToExport = { [CONFIG.get('api_key')]: localStorage.getItem(CONFIG.get('api_key')), [CONFIG.get('selectedPlant')]: localStorage.getItem(CONFIG.get('selectedPlant')) }; dataToExport[CONFIG.get('equipment_list')] = await dbManager.get(CONFIG.get('equipment_list')); for(let i=1; i<=3; i++) { const logs = await dbManager.get(CONFIG.get(`logs_plant_${i}`)); if (logs) dataToExport[CONFIG.get(`logs_plant_${i}`)] = logs; } const dataString = JSON.stringify(dataToExport, null, 2); const blob = new Blob([dataString], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `spa_data_backup_${new Date().toISOString().split('T')[0]}.json`; a.click(); URL.revokeObjectURL(a.href); showToast("ส่งออกข้อมูลทั้งหมดสำเร็จ!"); }
-        function handleImportData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const importedData = JSON.parse(e.target.result); if (!Object.keys(importedData).some(key => key.startsWith(CONFIG.appPrefix))) { throw new Error("ไฟล์ข้อมูลไม่ถูกต้องหรือไม่ตรงกับเวอร์ชันของแอป"); } showConfirmModal('คุณแน่ใจหรือไม่ที่จะนำเข้าข้อมูล? ข้อมูลปัจจุบันทั้งหมดจะถูกเขียนทับ!', async () => { await dbManager.clear(); for (const key in importedData) { if (key.includes('api_key') || key.includes('selectedPlant')) { localStorage.setItem(key, importedData[key]); } else if (key.startsWith(CONFIG.appPrefix)) { await dbManager.set(key, importedData[key]); } } localStorage.setItem('spa_v17_migrated_to_idb', 'true'); showToast("นำเข้าข้อมูลสำเร็จ! แอปจะทำการรีโหลด"); setTimeout(() => location.reload(), 1500); }); } catch (error) { showToast(`เกิดข้อผิดพลาดในการนำเข้า: ${error.message}`, true); } finally { event.target.value = ''; } }; reader.readAsText(file); }
+        function convertV8BackupToV17(data) {
+            const getCategoryFromTag = (tag) => {
+                const t = (tag || '').toUpperCase();
+                if (/^(PP-|TP-|PX-)/.test(t)) return 'PUMP';
+                if (/^PJ-/.test(t)) return 'AGITATOR';
+                if (/^PC-/.test(t)) return 'BLOWER, COMP.';
+                if (/^(PM-|PTK-|TTK-|PW-)/.test(t)) return 'SEPARATOR, FILTER';
+                if (/^(PZ-|TZ-)/.test(t)) return 'ROTARY VALVE';
+                if (/^(PS-|FC-|TC-|LC-|PC-|LI-|FI-|TI-)/.test(t)) return 'EI';
+                return 'STATIC';
+            };
+            const mapStatus = (s) => s === 'Repair' ? 'Open' : s === 'Warning' ? 'In Progress' : 'Closed';
+            const mapProblemType = (cat) => { const m = { 'Mechanic': 'Mechanical', 'Mechanical': 'Mechanical', 'Electrical': 'Electrical', 'Instrumentation': 'Instrumentation', 'Process': 'Process', 'Safety': 'Safety', 'Operation': 'Process' }; return m[cat] || 'Other'; };
+
+            const equipmentList = JSON.parse(JSON.stringify(CONFIG.defaultEquipment));
+            const logs = {};
+            const plantLogs = {};
+
+            (data.equipment || []).forEach(eq => {
+                const tag = (eq.tag || '').trim();
+                if (!tag) return;
+                const plantId = eq.plantId || 1;
+                const cat = getCategoryFromTag(tag);
+                if (!equipmentList[cat]) equipmentList[cat] = [];
+                if (!equipmentList[cat].includes(tag)) equipmentList[cat].push(tag);
+                if (eq.notes) {
+                    const ts = eq.updatedAt ? new Date(eq.updatedAt).getTime() : Date.now();
+                    const entry = { timestamp: ts, date: eq.updatedAt ? eq.updatedAt.slice(0, 16) : new Date().toISOString().slice(0, 16), shift: 'A', problemType: mapProblemType(eq.category || eq.department), details: (eq.notes || '') + (eq.lastRootCause ? '\n\n[Root Cause] ' + eq.lastRootCause : ''), recorder: eq.department || '', status: mapStatus(eq.status), image: eq.imageData || null };
+                    if (!plantLogs[plantId]) plantLogs[plantId] = {};
+                    if (!plantLogs[plantId][tag]) plantLogs[plantId][tag] = [];
+                    plantLogs[plantId][tag].push(entry);
+                }
+            });
+
+            const result = {};
+            result[CONFIG.get('equipment_list')] = equipmentList;
+            for (const pid in plantLogs) { result[CONFIG.get(`logs_plant_${pid}`)] = plantLogs[pid]; }
+            return result;
+        }
+
+        function handleImportData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { let importedData = JSON.parse(e.target.result); if (importedData.equipment && Array.isArray(importedData.equipment) && !Object.keys(importedData).some(key => key.startsWith(CONFIG.appPrefix))) { importedData = convertV8BackupToV17(importedData); } if (!Object.keys(importedData).some(key => key.startsWith(CONFIG.appPrefix))) { throw new Error("ไฟล์ข้อมูลไม่ถูกต้องหรือไม่ตรงกับเวอร์ชันของแอป"); } showConfirmModal('คุณแน่ใจหรือไม่ที่จะนำเข้าข้อมูล? ข้อมูลปัจจุบันทั้งหมดจะถูกเขียนทับ!', async () => { await dbManager.clear(); for (const key in importedData) { if (key.includes('api_key') || key.includes('selectedPlant')) { localStorage.setItem(key, importedData[key]); } else if (key.startsWith(CONFIG.appPrefix)) { await dbManager.set(key, importedData[key]); } } localStorage.setItem('spa_v17_migrated_to_idb', 'true'); showToast("นำเข้าข้อมูลสำเร็จ! แอปจะทำการรีโหลด"); setTimeout(() => location.reload(), 1500); }); } catch (error) { showToast(`เกิดข้อผิดพลาดในการนำเข้า: ${error.message}`, true); } finally { event.target.value = ''; } }; reader.readAsText(file); }
 
         function openImportModal() { importModal.innerHTML = importModalTemplate.innerHTML; importModal.classList.remove('hidden'); importModal.querySelector('#close-import-btn').addEventListener('click', () => importModal.classList.add('hidden')); importModal.querySelector('#import-file-input').addEventListener('change', handleExcelFileSelect); importModal.querySelector('#confirm-import-btn').addEventListener('click', handleConfirmImport); importModal.querySelector('#import-sheet-selector').addEventListener('change', updateConfirmBtnState); importModal.querySelector('#import-shift-selector').addEventListener('change', updateConfirmBtnState); }
         function updateConfirmBtnState() { const confirmBtn = importModal.querySelector('#confirm-import-btn'); const sheet = importModal.querySelector('#import-sheet-selector').value; const shift = importModal.querySelector('input[name="shift-option"]:checked'); confirmBtn.disabled = !(sheet && shift); }
