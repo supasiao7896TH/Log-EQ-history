@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Header Mockup v2 — GC-M PTA</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Sarabun', sans-serif; background: #eef2f9; padding: 24px; }
+  .label { font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; margin-top: 8px; }
+
+  /* ── D: Sky Blue Daytime ── */
+  .header-d {
+    background: linear-gradient(160deg, #dbeafe 0%, #bfdbfe 30%, #ede9fe 70%, #e0e7ff 100%);
+    border-radius: 24px; padding: 32px; position: relative; overflow: hidden;
+    box-shadow: 0 8px 32px rgba(99,102,241,0.15), 0 2px 8px rgba(0,0,0,0.06);
+  }
+  /* ── E: Sunrise / Golden Hour ── */
+  .header-e {
+    background: linear-gradient(150deg, #fef3c7 0%, #fde68a 20%, #fed7aa 50%, #fecaca 80%, #e9d5ff 100%);
+    border-radius: 24px; padding: 32px; position: relative; overflow: hidden;
+    box-shadow: 0 8px 32px rgba(245,158,11,0.2), 0 2px 8px rgba(0,0,0,0.06);
+  }
+  /* ── F: Twilight (medium — ไม่สว่างไม่มืด) ── */
+  .header-f {
+    background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 35%, #3730a3 65%, #5b21b6 100%);
+    border-radius: 24px; padding: 32px; position: relative; overflow: hidden;
+    box-shadow: 0 8px 32px rgba(30,64,175,0.4);
+  }
+  /* ── G: Mint / Teal Light ── */
+  .header-g {
+    background: linear-gradient(150deg, #ecfdf5 0%, #d1fae5 30%, #a7f3d0 55%, #e0f2fe 100%);
+    border-radius: 24px; padding: 32px; position: relative; overflow: hidden;
+    box-shadow: 0 8px 32px rgba(16,185,129,0.15), 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .btn-light { background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.9); border-radius: 12px; padding: 10px; backdrop-filter: blur(8px); transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .btn-light:hover { background: rgba(255,255,255,0.9); }
+  .btn-dark { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 10px; backdrop-filter: blur(4px); }
+  .input-light { background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.9); border-radius: 12px; padding: 10px 16px; font-size: 14px; backdrop-filter: blur(8px); }
+  .input-dark { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); border-radius: 12px; padding: 10px 16px; font-size: 14px; color: white; }
+
+  /* SVG factory shared */
+  .factory-svg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; select: none; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     OPTION D: Sky Blue — กลางวัน สว่าง
+══════════════════════════════════════ -->
+<p class="label">Option D — Sky Blue (กลางวัน สว่าง เย็นตา)</p>
+<div class="header-d mb-10">
+
+  <!-- cloud blobs -->
+  <div class="absolute top-4 right-20 w-40 h-16 bg-white/50 rounded-full blur-2xl"></div>
+  <div class="absolute top-8 right-48 w-24 h-12 bg-white/40 rounded-full blur-xl"></div>
+
+  <!-- SVG factory — color version for light bg -->
+  <div class="factory-svg opacity-30">
+    <svg viewBox="0 0 900 230" preserveAspectRatio="xMaxYMax meet" class="w-full h-full">
+      <line x1="0" y1="218" x2="900" y2="218" stroke="#6366f1" stroke-width="2"/>
+      <!-- ground shadow -->
+      <ellipse cx="750" cy="218" rx="140" ry="6" fill="#6366f1" opacity=".1"/>
+      <!-- storage tank big -->
+      <ellipse cx="770" cy="185" rx="34" ry="12" fill="#60a5fa" opacity=".8"/>
+      <rect x="736" y="148" width="68" height="37" rx="4" fill="#3b82f6" opacity=".6"/>
+      <ellipse cx="770" cy="148" rx="34" ry="12" fill="#93c5fd" opacity=".9"/>
+      <!-- piping to tank -->
+      <path d="M736 180 Q700 175 672 178" stroke="#6366f1" stroke-width="5" fill="none" stroke-linecap="round" opacity=".6"/>
+      <!-- tank small -->
+      <ellipse cx="830" cy="193" rx="22" ry="8" fill="#7dd3fc" opacity=".7"/>
+      <rect x="808" y="163" width="44" height="30" rx="3" fill="#38bdf8" opacity=".5"/>
+      <ellipse cx="830" cy="163" rx="22" ry="8" fill="#bae6fd" opacity=".8"/>
+      <!-- distillation column tall -->
+      <rect x="610" y="52" width="30" height="166" rx="8" fill="#6366f1" opacity=".5"/>
+      <ellipse cx="625" cy="52" rx="15" ry="5" fill="#a5b4fc" opacity=".8"/>
+      <rect x="610" y="90" width="30" height="5" rx="2" fill="#c7d2fe" opacity=".8"/>
+      <rect x="610" y="120" width="30" height="5" rx="2" fill="#c7d2fe" opacity=".8"/>
+      <rect x="610" y="150" width="30" height="5" rx="2" fill="#c7d2fe" opacity=".8"/>
+      <!-- column medium -->
+      <rect x="655" y="85" width="24" height="133" rx="6" fill="#818cf8" opacity=".45"/>
+      <ellipse cx="667" cy="85" rx="12" ry="4" fill="#a5b4fc" opacity=".7"/>
+      <!-- pipes -->
+      <path d="M640 180 Q656 178 655 178" stroke="#6366f1" stroke-width="4" fill="none" opacity=".5"/>
+      <path d="M679 180 Q700 177 736 180" stroke="#6366f1" stroke-width="4" fill="none" opacity=".5"/>
+      <!-- vertical pipe + clouds -->
+      <line x1="625" y1="50" x2="625" y2="15" stroke="#6366f1" stroke-width="3" opacity=".4"/>
+      <circle cx="625" cy="9" r="10" fill="white" opacity=".5"/>
+      <circle cx="635" cy="4" r="7" fill="white" opacity=".4"/>
+      <circle cx="618" cy="3" r="6" fill="white" opacity=".35"/>
+      <line x1="667" y1="83" x2="667" y2="52" stroke="#818cf8" stroke-width="2.5" opacity=".4"/>
+      <circle cx="667" cy="46" r="7" fill="white" opacity=".4"/>
+      <!-- control room -->
+      <rect x="542" y="158" width="58" height="60" rx="6" fill="#4f46e5" opacity=".35"/>
+      <rect x="549" y="168" width="14" height="12" rx="2" fill="#bfdbfe" opacity=".7"/>
+      <rect x="568" y="168" width="14" height="12" rx="2" fill="#bfdbfe" opacity=".7"/>
+      <rect x="555" y="184" width="16" height="34" rx="2" fill="#6366f1" opacity=".4"/>
+      <path d="M530 185 Q536 183 542 183" stroke="#6366f1" stroke-width="3" fill="none" opacity=".5"/>
+      <!-- flare stack -->
+      <line x1="875" y1="218" x2="875" y2="100" stroke="#f59e0b" stroke-width="3" opacity=".6"/>
+      <path d="M869 100 Q875 82 881 100" fill="#fbbf24" opacity=".7"/>
+      <circle cx="875" cy="77" r="9" fill="#fde68a" opacity=".6"/>
+      <circle cx="875" cy="65" r="6" fill="#fef3c7" opacity=".4"/>
+    </svg>
+  </div>
+
+  <div class="relative z-10 flex flex-col gap-4">
+    <div class="flex items-center justify-between flex-wrap gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-0.5 rounded-full tracking-wider">GC-M PTA PLANT</span>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+          <span class="text-indigo-900">Smart Production</span><br>
+          <span class="text-indigo-600">Assistant</span>
+        </h1>
+        <p class="text-indigo-400 text-sm mt-1.5">v7.9.15 · IndexedDB Upgrade</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="btn-light"><svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3"/></svg></button>
+        <button class="btn-light"><svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10"/></svg></button>
+        <button class="btn-light"><svg class="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h4"/></svg></button>
+        <button class="btn-light"><svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></button>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 max-w-md gap-3 mt-1">
+      <div><label class="block text-xs font-semibold text-indigo-600 mb-1">เลือก Plant</label><div class="input-light text-indigo-900">Plant 1</div></div>
+      <div><label class="block text-xs font-semibold text-indigo-600 mb-1">ค้นหาอุปกรณ์</label><div class="input-light text-slate-400">พิมพ์ชื่ออุปกรณ์...</div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     OPTION E: Sunrise / Golden Hour
+══════════════════════════════════════ -->
+<p class="label">Option E — Sunrise / Golden Hour (อบอุ่น มีชีวิตชีวา)</p>
+<div class="header-e mb-10">
+
+  <div class="absolute top-2 right-32 w-48 h-20 bg-white/40 rounded-full blur-2xl"></div>
+  <div class="absolute bottom-4 left-20 w-32 h-14 bg-orange-200/30 rounded-full blur-xl"></div>
+
+  <div class="factory-svg opacity-25">
+    <svg viewBox="0 0 900 230" preserveAspectRatio="xMaxYMax meet" class="w-full h-full">
+      <line x1="0" y1="218" x2="900" y2="218" stroke="#d97706" stroke-width="2"/>
+      <ellipse cx="770" cy="185" rx="34" ry="12" fill="#f59e0b" opacity=".7"/>
+      <rect x="736" y="148" width="68" height="37" rx="4" fill="#d97706" opacity=".6"/>
+      <ellipse cx="770" cy="148" rx="34" ry="12" fill="#fcd34d" opacity=".8"/>
+      <ellipse cx="830" cy="193" rx="22" ry="8" fill="#fbbf24" opacity=".7"/>
+      <rect x="808" y="163" width="44" height="30" rx="3" fill="#f59e0b" opacity=".5"/>
+      <ellipse cx="830" cy="163" rx="22" ry="8" fill="#fde68a" opacity=".7"/>
+      <rect x="610" y="52" width="30" height="166" rx="8" fill="#b45309" opacity=".5"/>
+      <ellipse cx="625" cy="52" rx="15" ry="5" fill="#fcd34d" opacity=".8"/>
+      <rect x="610" y="90" width="30" height="5" rx="2" fill="#fef3c7" opacity=".8"/>
+      <rect x="610" y="120" width="30" height="5" rx="2" fill="#fef3c7" opacity=".8"/>
+      <rect x="610" y="150" width="30" height="5" rx="2" fill="#fef3c7" opacity=".8"/>
+      <rect x="655" y="85" width="24" height="133" rx="6" fill="#92400e" opacity=".4"/>
+      <ellipse cx="667" cy="85" rx="12" ry="4" fill="#fde68a" opacity=".7"/>
+      <path d="M640 180 Q660 178 679 180" stroke="#d97706" stroke-width="4" fill="none" opacity=".5"/>
+      <path d="M679 180 Q700 177 736 180" stroke="#d97706" stroke-width="4" fill="none" opacity=".5"/>
+      <line x1="625" y1="50" x2="625" y2="15" stroke="#b45309" stroke-width="3" opacity=".4"/>
+      <circle cx="625" cy="8" r="10" fill="white" opacity=".4"/>
+      <circle cx="634" cy="3" r="7" fill="white" opacity=".35"/>
+      <line x1="667" y1="83" x2="667" y2="50" stroke="#92400e" stroke-width="2.5" opacity=".4"/>
+      <circle cx="667" cy="44" r="7" fill="white" opacity=".35"/>
+      <rect x="542" y="158" width="58" height="60" rx="6" fill="#92400e" opacity=".35"/>
+      <rect x="549" y="168" width="14" height="12" rx="2" fill="#fef9c3" opacity=".7"/>
+      <rect x="568" y="168" width="14" height="12" rx="2" fill="#fef9c3" opacity=".7"/>
+      <!-- sun -->
+      <circle cx="200" cy="50" r="30" fill="#fde68a" opacity=".4"/>
+      <circle cx="200" cy="50" r="20" fill="#fef3c7" opacity=".5"/>
+      <!-- sun rays -->
+      <line x1="200" y1="15" x2="200" y2="5" stroke="#fcd34d" stroke-width="2" opacity=".4"/>
+      <line x1="225" y1="25" x2="232" y2="18" stroke="#fcd34d" stroke-width="2" opacity=".4"/>
+      <line x1="235" y1="50" x2="245" y2="50" stroke="#fcd34d" stroke-width="2" opacity=".4"/>
+      <line x1="870" y1="218" x2="870" y2="100" stroke="#dc2626" stroke-width="3" opacity=".5"/>
+      <circle cx="870" cy="85" r="9" fill="#fca5a5" opacity=".6"/>
+    </svg>
+  </div>
+
+  <div class="relative z-10 flex flex-col gap-4">
+    <div class="flex items-center justify-between flex-wrap gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="bg-amber-200/70 text-amber-900 text-xs font-bold px-3 py-0.5 rounded-full tracking-wider">GC-M PTA PLANT</span>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+          <span class="text-amber-900">Smart Production</span><br>
+          <span class="text-orange-600">Assistant</span>
+        </h1>
+        <p class="text-amber-700 text-sm mt-1.5">v7.9.15 · IndexedDB Upgrade</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="btn-light"><svg class="w-6 h-6 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3"/></svg></button>
+        <button class="btn-light"><svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10"/></svg></button>
+        <button class="btn-light"><svg class="w-6 h-6 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h4"/></svg></button>
+        <button class="btn-light"><svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></button>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 max-w-md gap-3 mt-1">
+      <div><label class="block text-xs font-semibold text-amber-800 mb-1">เลือก Plant</label><div class="input-light text-amber-900">Plant 1</div></div>
+      <div><label class="block text-xs font-semibold text-amber-800 mb-1">ค้นหาอุปกรณ์</label><div class="input-light text-slate-400">พิมพ์ชื่ออุปกรณ์...</div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     OPTION F: Twilight Blue (กลางๆ)
+══════════════════════════════════════ -->
+<p class="label">Option F — Twilight Blue (กลางๆ ไม่สว่างไม่มืด)</p>
+<div class="header-f mb-10">
+  <div class="absolute top-0 right-16 w-64 h-48 bg-blue-400/20 rounded-full blur-3xl"></div>
+  <div class="absolute bottom-0 left-8 w-48 h-40 bg-violet-400/20 rounded-full blur-2xl"></div>
+
+  <div class="factory-svg opacity-30">
+    <svg viewBox="0 0 900 230" preserveAspectRatio="xMaxYMax meet" class="w-full h-full">
+      <line x1="0" y1="218" x2="900" y2="218" stroke="#93c5fd" stroke-width="2"/>
+      <ellipse cx="770" cy="185" rx="34" ry="12" fill="#60a5fa" opacity=".7"/>
+      <rect x="736" y="148" width="68" height="37" rx="4" fill="#3b82f6" opacity=".5"/>
+      <ellipse cx="770" cy="148" rx="34" ry="12" fill="#93c5fd" opacity=".8"/>
+      <ellipse cx="835" cy="193" rx="22" ry="8" fill="#7dd3fc" opacity=".6"/>
+      <rect x="813" y="163" width="44" height="30" rx="3" fill="#0ea5e9" opacity=".4"/>
+      <ellipse cx="835" cy="163" rx="22" ry="8" fill="#bae6fd" opacity=".7"/>
+      <rect x="610" y="50" width="30" height="168" rx="8" fill="#1d4ed8" opacity=".6"/>
+      <ellipse cx="625" cy="50" rx="15" ry="5" fill="#93c5fd" opacity=".9"/>
+      <rect x="610" y="88" width="30" height="5" rx="2" fill="#bfdbfe" opacity=".8"/>
+      <rect x="610" y="118" width="30" height="5" rx="2" fill="#bfdbfe" opacity=".8"/>
+      <rect x="610" y="148" width="30" height="5" rx="2" fill="#bfdbfe" opacity=".8"/>
+      <rect x="656" y="82" width="24" height="136" rx="6" fill="#2563eb" opacity=".5"/>
+      <ellipse cx="668" cy="82" rx="12" ry="4" fill="#93c5fd" opacity=".7"/>
+      <path d="M640 180 Q660 177 656 177" stroke="#60a5fa" stroke-width="4" fill="none" opacity=".6"/>
+      <path d="M680 180 Q700 177 736 180" stroke="#60a5fa" stroke-width="4" fill="none" opacity=".6"/>
+      <line x1="625" y1="48" x2="625" y2="14" stroke="#93c5fd" stroke-width="3" opacity=".5"/>
+      <circle cx="625" cy="7" r="10" fill="#e0f2fe" opacity=".4"/>
+      <circle cx="634" cy="2" r="7" fill="#e0f2fe" opacity=".3"/>
+      <rect x="540" y="156" width="58" height="62" rx="6" fill="#1e3a8a" opacity=".5"/>
+      <rect x="547" y="166" width="14" height="12" rx="2" fill="#bfdbfe" opacity=".6"/>
+      <rect x="566" y="166" width="14" height="12" rx="2" fill="#bfdbfe" opacity=".6"/>
+      <!-- stars / moon -->
+      <circle cx="150" cy="30" r="2" fill="white" opacity=".5"/>
+      <circle cx="180" cy="15" r="1.5" fill="white" opacity=".4"/>
+      <circle cx="220" cy="35" r="1" fill="white" opacity=".4"/>
+      <circle cx="100" cy="20" r="1.5" fill="white" opacity=".3"/>
+      <!-- moon crescent -->
+      <circle cx="260" cy="25" r="14" fill="#dbeafe" opacity=".2"/>
+      <circle cx="268" cy="20" r="11" fill="#1e40af" opacity=".8"/>
+      <line x1="872" y1="218" x2="872" y2="98" stroke="#f59e0b" stroke-width="3" opacity=".6"/>
+      <circle cx="872" cy="83" r="9" fill="#fde68a" opacity=".6"/>
+      <circle cx="872" cy="70" r="6" fill="#fef3c7" opacity=".4"/>
+    </svg>
+  </div>
+
+  <div class="relative z-10 flex flex-col gap-4">
+    <div class="flex items-center justify-between flex-wrap gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="bg-blue-400/20 text-blue-200 text-xs font-bold px-3 py-0.5 rounded-full tracking-wider border border-blue-400/30">GC-M PTA PLANT</span>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+          <span class="text-white">Smart Production</span><br>
+          <span class="text-blue-300">Assistant</span>
+        </h1>
+        <p class="text-blue-300/70 text-sm mt-1.5">v7.9.15 · IndexedDB Upgrade</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="btn-dark"><svg class="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3"/></svg></button>
+        <button class="btn-dark"><svg class="w-6 h-6 text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10"/></svg></button>
+        <button class="btn-dark"><svg class="w-6 h-6 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h4"/></svg></button>
+        <button class="btn-dark"><svg class="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></button>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 max-w-md gap-3 mt-1">
+      <div><label class="block text-xs font-semibold text-blue-300 mb-1">เลือก Plant</label><div class="input-dark">Plant 1</div></div>
+      <div><label class="block text-xs font-semibold text-blue-300 mb-1">ค้นหาอุปกรณ์</label><div class="input-dark" style="color:rgba(255,255,255,0.3)">พิมพ์ชื่ออุปกรณ์...</div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     OPTION G: Mint / Teal Fresh
+══════════════════════════════════════ -->
+<p class="label">Option G — Mint Green (สดชื่น เหมือนโรงงานสะอาด)</p>
+<div class="header-g mb-10">
+  <div class="absolute top-2 right-24 w-48 h-24 bg-white/50 rounded-full blur-2xl"></div>
+  <div class="absolute bottom-0 left-16 w-36 h-20 bg-teal-200/40 rounded-full blur-xl"></div>
+
+  <div class="factory-svg opacity-25">
+    <svg viewBox="0 0 900 230" preserveAspectRatio="xMaxYMax meet" class="w-full h-full">
+      <line x1="0" y1="218" x2="900" y2="218" stroke="#059669" stroke-width="2"/>
+      <ellipse cx="770" cy="185" rx="34" ry="12" fill="#34d399" opacity=".7"/>
+      <rect x="736" y="148" width="68" height="37" rx="4" fill="#10b981" opacity=".5"/>
+      <ellipse cx="770" cy="148" rx="34" ry="12" fill="#6ee7b7" opacity=".8"/>
+      <rect x="610" y="50" width="30" height="168" rx="8" fill="#047857" opacity=".5"/>
+      <ellipse cx="625" cy="50" rx="15" ry="5" fill="#6ee7b7" opacity=".8"/>
+      <rect x="610" y="88" width="30" height="5" rx="2" fill="#a7f3d0" opacity=".8"/>
+      <rect x="610" y="118" width="30" height="5" rx="2" fill="#a7f3d0" opacity=".8"/>
+      <rect x="610" y="148" width="30" height="5" rx="2" fill="#a7f3d0" opacity=".8"/>
+      <rect x="656" y="82" width="24" height="136" rx="6" fill="#065f46" opacity=".4"/>
+      <ellipse cx="668" cy="82" rx="12" ry="4" fill="#a7f3d0" opacity=".7"/>
+      <path d="M640 180 Q660 177 656 177" stroke="#10b981" stroke-width="4" fill="none" opacity=".5"/>
+      <path d="M680 180 Q700 177 736 180" stroke="#10b981" stroke-width="4" fill="none" opacity=".5"/>
+      <line x1="625" y1="48" x2="625" y2="14" stroke="#6ee7b7" stroke-width="3" opacity=".4"/>
+      <circle cx="625" cy="7" r="10" fill="white" opacity=".45"/>
+      <circle cx="634" cy="2" r="7" fill="white" opacity=".35"/>
+      <rect x="540" y="156" width="58" height="62" rx="6" fill="#064e3b" opacity=".4"/>
+      <rect x="547" y="166" width="14" height="12" rx="2" fill="#d1fae5" opacity=".6"/>
+      <rect x="566" y="166" width="14" height="12" rx="2" fill="#d1fae5" opacity=".6"/>
+      <line x1="872" y1="218" x2="872" y2="98" stroke="#f59e0b" stroke-width="3" opacity=".5"/>
+      <circle cx="872" cy="83" r="9" fill="#fde68a" opacity=".5"/>
+    </svg>
+  </div>
+
+  <div class="relative z-10 flex flex-col gap-4">
+    <div class="flex items-center justify-between flex-wrap gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="bg-emerald-200/80 text-emerald-800 text-xs font-bold px-3 py-0.5 rounded-full tracking-wider">GC-M PTA PLANT</span>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+          <span class="text-emerald-950">Smart Production</span><br>
+          <span class="text-emerald-600">Assistant</span>
+        </h1>
+        <p class="text-emerald-600 text-sm mt-1.5">v7.9.15 · IndexedDB Upgrade</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="btn-light"><svg class="w-6 h-6 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3"/></svg></button>
+        <button class="btn-light"><svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10"/></svg></button>
+        <button class="btn-light"><svg class="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h4"/></svg></button>
+        <button class="btn-light"><svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></button>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 max-w-md gap-3 mt-1">
+      <div><label class="block text-xs font-semibold text-emerald-700 mb-1">เลือก Plant</label><div class="input-light text-emerald-900">Plant 1</div></div>
+      <div><label class="block text-xs font-semibold text-emerald-700 mb-1">ค้นหาอุปกรณ์</label><div class="input-light text-slate-400">พิมพ์ชื่ออุปกรณ์...</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="text-center text-slate-400 text-sm mt-2 pb-8">
+  ชอบ Option ไหน หรืออยากผสมสีใดบอกได้เลยครับ 🙏<br>
+  <span class="text-xs text-slate-300">หรือจะส่งภาพที่ชอบมา แล้วผมจะจับคู่สีให้ครับ</span>
+</div>
+
+</body>
+</html>
