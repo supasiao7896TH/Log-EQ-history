@@ -1,11 +1,11 @@
 const CACHE_NAME = 'smart-pa-v1';
 
 const PRE_CACHE = [
-    '/log-eq-history/',
-    '/log-eq-history/index.html',
-    '/log-eq-history/manifest.json',
-    '/log-eq-history/icons/icon-192.png',
-    '/log-eq-history/icons/icon-512.png',
+    '/Log-EQ-history/',
+    '/Log-EQ-history/index.html',
+    '/Log-EQ-history/manifest.json',
+    '/Log-EQ-history/icons/icon-192.png',
+    '/Log-EQ-history/icons/icon-512.png',
 ];
 
 const CDN_ORIGINS = [
@@ -75,7 +75,7 @@ self.addEventListener('fetch', event => {
             })
             .catch(() =>
                 caches.match(event.request)
-                    .then(cached => cached || caches.match('/log-eq-history/'))
+                    .then(cached => cached || caches.match('/Log-EQ-history/'))
             )
     );
 });
