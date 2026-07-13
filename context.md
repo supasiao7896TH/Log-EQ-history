@@ -83,6 +83,15 @@ Fixed in roughly this order — see git log for details:
    solid-color square with no symbol.
 7. Added a touch-reachable entry point for the API key modal (previously only
    reachable via the `Ctrl+.` desktop shortcut, unusable on mobile/PWA).
+8. Gemini model deprecated *again* (`gemini-2.5-flash` this time, same failure
+   class as item 3): default model switched from a dated model name to the
+   Google-maintained `gemini-flash-latest` alias, which Google keeps repointed
+   at its current recommended Flash model so this shouldn't need a manual
+   hardcode fix again. Also widened the auto-discovery trigger, which
+   previously only fired on a bare HTTP 404 — Google's "no longer available to
+   new users" deprecation error surfaces as 400/403 with a message instead, so
+   the retry loop now also treats that as a signal to auto-discover and switch
+   to a live model.
 
 ## Known external quirks worth remembering
 
