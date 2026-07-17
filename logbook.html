@@ -356,22 +356,6 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 40px;color:var(--muted);fon
     </div>
     <div class="card">
       <div class="stat">
-        <span class="label">ระดับถัง TTK-400 (เช้า → ดึก)</span>
-        <span class="value" style="display:flex;gap:6px;align-items:baseline">
-          <input class="cell-input num" id="ov-ttkDay" style="width:70px" placeholder="0">→
-          <input class="cell-input num" id="ov-ttkNight" style="width:70px" placeholder="0"> <small>ton</small>
-        </span>
-      </div>
-      <div class="stat" style="margin-top:8px">
-        <span class="label">TK-401 (เช้า → ดึก)</span>
-        <span class="value" style="font-size:16px;display:flex;gap:6px;align-items:baseline">
-          <input class="cell-input num" id="ov-tk401Day" style="width:50px;font-size:16px" placeholder="0">→
-          <input class="cell-input num" id="ov-tk401Night" style="width:50px;font-size:16px" placeholder="0">
-        </span>
-      </div>
-    </div>
-    <div class="card">
-      <div class="stat">
         <span class="label">Critical Alarms วันนี้</span>
         <span class="value" id="ov-alarmTotal">0 <small>รายการ</small></span>
       </div>
@@ -662,7 +646,7 @@ function emptyDay(dateStr){
     date: dateStr,
     crew: { day:{fm:'',bm:''}, night:{fm:'',bm:''} },
     kpi: { cba4:{day:'',night:''}, pta:{day:'',night:''}, t340:{day:'',night:''}, mps:{day:'',night:''}, bvalue:{day:'',night:''}, ht340:{day:'',night:''}, load:{day:'',night:''} },
-    ttk400: {day:'',night:''}, tk401:{day:'',night:''}, totalProduct:'',
+    totalProduct:'',
     dailyWork: [], qualityLog: [],
     qualityPanel: { cta4cba:'', ctaT340:'', recovM:'', recovN:'' },
     safety: { 1:'ok', 2:'ok', 3:'ok', 4:'ok', 5:'ok' },
@@ -766,7 +750,7 @@ async function seedSampleIfEmpty(){
   d.crew = { day:{fm:'ชาญชัช',bm:'ศุภสิทธิ์'}, night:{fm:'เฉลิมพล',bm:'ฐาณันตร์'} };
   d.kpi = { cba4:{day:'15.06',night:'15.11'}, pta:{day:'165.00',night:'159.00'}, t340:{day:'89.90',night:'89.20'},
     mps:{day:'120.00',night:'122.00'}, bvalue:{day:'0.75',night:'0.75'}, ht340:{day:'72.80',night:''}, load:{day:'98.00',night:'98.00'} };
-  d.ttk400 = {day:'105',night:'118'}; d.tk401 = {day:'7',night:'9'}; d.totalProduct='1316.00';
+  d.totalProduct='1316.00';
   d.qualityPanel = { cta4cba:'3910', ctaT340:'15.0', recovM:'3', recovN:'8' };
   d.alarms = {'PS-2611':0,'PS-2611B':0,'PS-2611C':0,'AI-2400':0,'TI-2601':0};
   d.silo = [
@@ -855,10 +839,6 @@ document.getElementById('segNight').addEventListener('click', ()=>{
 /* ================= Render: Overview ================= */
 function renderOverview(){
   document.getElementById('ov-totalProduct').value = currentDay.totalProduct;
-  document.getElementById('ov-ttkDay').value = currentDay.ttk400.day;
-  document.getElementById('ov-ttkNight').value = currentDay.ttk400.night;
-  document.getElementById('ov-tk401Day').value = currentDay.tk401.day;
-  document.getElementById('ov-tk401Night').value = currentDay.tk401.night;
   document.getElementById('crew-day-fm').value = currentDay.crew.day.fm;
   document.getElementById('crew-day-bm').value = currentDay.crew.day.bm;
   document.getElementById('crew-night-fm').value = currentDay.crew.night.fm;
@@ -938,15 +918,9 @@ function updateOverviewAlarmSummary(){
   if(ledsEl) ledsEl.innerHTML = ledsHtml.join('');
 }
 
-['ov-totalProduct','ov-ttkDay','ov-ttkNight','ov-tk401Day','ov-tk401Night'].forEach(id=>{
-  document.getElementById(id).addEventListener('input', e=>{
-    if(id==='ov-totalProduct') currentDay.totalProduct = e.target.value;
-    if(id==='ov-ttkDay') currentDay.ttk400.day = e.target.value;
-    if(id==='ov-ttkNight') currentDay.ttk400.night = e.target.value;
-    if(id==='ov-tk401Day') currentDay.tk401.day = e.target.value;
-    if(id==='ov-tk401Night') currentDay.tk401.night = e.target.value;
-    scheduleSave();
-  });
+document.getElementById('ov-totalProduct').addEventListener('input', e=>{
+  currentDay.totalProduct = e.target.value;
+  scheduleSave();
 });
 ['crew-day-fm','crew-day-bm','crew-night-fm','crew-night-bm'].forEach(id=>{
   document.getElementById(id).addEventListener('input', e=>{
