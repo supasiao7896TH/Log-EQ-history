@@ -593,7 +593,7 @@ const CONFIG = {
     "PJ-402","PJ-404","PC-201A","PC-201B","PC-401","PC-403A","PC-403B","PC-601","PC-602","PC-901","PM-101-1","PM-101-2","PM-102",
     "PM-105","PM-401A","PM-401B","PM-401D","PM-402A","PM-402B","PM-404-1","PM-404-2","PM-404-3","PM-404-4","PM-802A","PM-802B",
     "PM-802C","PM-804A","PM-804B","PM-804C","PM-901","PM-902","PZ-100","TZ-400","PZ-403","PZ-800A","PZ-800B","PZ-800C","PM-500A",
-    "PM-500B","PM-803A","PM-803B","PM-803C","PM-104","PTK-800A","PTK-800B","PTK-800C","PW-901","TTK-400","TTK-400","PE-101A",
+    "PM-500B","PM-803A","PM-803B","PM-803C","PM-104","PTK-800A","PTK-800B","PTK-800C","PW-901","TTK-400","PE-101A",
     "PE-101B","PE-101C","PE-101D","PE-101E","PE-101F","PT-501","PD-501","PD-403","PC-2201","KCV-2907","LCV-2301-3","PI-2412",
     "LI-2901","FC-2601","FC-2602","FC-2603","PI-2601","TI-2610B","AI-2400","TI-2601","PS-2611","PS-2611B","PS-2611C","FC-2302"],
   kpiItems: [
@@ -728,7 +728,7 @@ let saveTimer = null;
 
 async function loadDay(dateStr){
   let day = await dbManager.get(dateStr);
-  if(!day){ day = emptyDay(dateStr); await dbManager.set(dateStr, day); }
+  if(!day) day = emptyDay(dateStr); // ยังไม่เขียนลง DB — จะถูกเซฟครั้งแรกเมื่อมีการแก้ไขจริง
   // backfill any missing keys for forward-compat
   const blank = emptyDay(dateStr);
   day = Object.assign({}, blank, day);
@@ -757,9 +757,13 @@ async function loadDay(dateStr){
 }
 function scheduleSave(){
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(()=>{ dbManager.set(currentDate, currentDay); }, 300);
+  const dateStr = currentDate, day = currentDay; // จับคู่วัน-ข้อมูล ณ ตอนแก้ ไม่ใช่ตอน timer ยิง
+  saveTimer = setTimeout(()=>{ saveTimer=null; dbManager.set(dateStr, day); }, 300);
 }
-async function saveNow(){ clearTimeout(saveTimer); await dbManager.set(currentDate, currentDay); }
+async function saveNow(){ clearTimeout(saveTimer); saveTimer=null; await dbManager.set(currentDate, currentDay); }
+async function flushPendingSave(){
+  if(saveTimer!==null){ clearTimeout(saveTimer); saveTimer=null; await dbManager.set(currentDate, currentDay); }
+}
 
 /* ================= Seed sample data (first run only) ================= */
 async function seedSampleIfEmpty(){
@@ -831,6 +835,8 @@ document.querySelectorAll('.tabs [role=tab]').forEach(btn=>{
 const dateInput = document.getElementById('dateInput');
 function shiftDate(base, days){ const d=new Date(base+'T00:00:00'); d.setDate(d.getDate()+days); return todayStr(d); }
 async function goToDate(dateStr){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)){ dateInput.value = currentDate; return; }
+  await flushPendingSave();
   currentDate = dateStr;
   localStorage.setItem('logbook_lastDate', dateStr);
   dateInput.value = dateStr;
@@ -877,7 +883,7 @@ function renderOverview(){
   renderKpiTable();
 
   // important entries roll-up
-  const important = currentDay.dailyWork.filter(e=>e.important).sort((a,b)=>a.time.localeCompare(b.time));
+  const important = currentDay.dailyWork.filter(e=>e.important).sort((a,b)=>entryTimeKey(a)-entryTimeKey(b));
   document.getElementById('ov-important').innerHTML = important.length
     ? important.map(e=>`<div class="hist-item red-item"><span class="ht">${esc(e.time)}</span><span class="htxt">${esc(e.text.split('\n')[0])}</span></div>`).join('')
     : '<p class="empty-hint">ยังไม่มีรายการที่ทำเครื่องหมายสำคัญวันนี้</p>';
@@ -963,6 +969,7 @@ function wireComposer(root, onSave){
   const typeSelect = root.querySelector('.typeSelect');
   const statusSelect = root.querySelector('.statusSelect');
   let photos = [];
+  let pendingPhotos = 0; // รูปที่กำลังบีบอัด — ห้ามบันทึกจนกว่าจะเสร็จ
   let parsed = {time:null,tags:[],type:null,important:false};
   let parseTimer=null;
   let typeManuallySet = false;
@@ -977,7 +984,7 @@ function wireComposer(root, onSave){
 
   function renderLiveParse(){
     const txt = textarea.value;
-    if(!txt.trim()){ liveParse.innerHTML='<span class="plabel">🤖 ตรวจพบอัตโนมัติ:</span><span class="note">— เริ่มพิมพ์เพื่อดูการแยกข้อมูล —</span>'; saveBtn.disabled = photos.length===0; return; }
+    if(!txt.trim()){ liveParse.innerHTML='<span class="plabel">🤖 ตรวจพบอัตโนมัติ:</span><span class="note">— เริ่มพิมพ์เพื่อดูการแยกข้อมูล —</span>'; saveBtn.disabled = pendingPhotos>0 || photos.length===0; return; }
     parsed = autoParse(txt);
     if(impBtn && impBtn.getAttribute('aria-pressed')==='true') parsed.important = true;
     if(typeSelect && !typeManuallySet) typeSelect.value = parsed.type || '';
@@ -986,7 +993,7 @@ function wireComposer(root, onSave){
     parsed.tags.forEach(t=>{ h += `<span class="chip tagchip" title="${t.known?'พบในรายการอุปกรณ์':'ไม่พบในรายการ EQ ที่รู้จัก — ตรวจสอบรหัส'}">${t.known?'':'❓'}${esc(t.tag)}</span>`; });
     if(parsed.important) h += '<span class="chip bad">⭐ ตัวแดง</span>';
     liveParse.innerHTML = h;
-    saveBtn.disabled = false;
+    saveBtn.disabled = pendingPhotos>0;
   }
   textarea.addEventListener('input', ()=>{ clearTimeout(parseTimer); parseTimer=setTimeout(renderLiveParse,200); });
 
@@ -1026,17 +1033,20 @@ function wireComposer(root, onSave){
     });
   }
   function addPhoto(dataUrl){
+    pendingPhotos++; saveBtn.disabled = true;
     compressDataUrl(dataUrl, 900, 0.72).then(compressed=>{
+      pendingPhotos--;
       photos.push(compressed); renderPhotoStrip();
-      saveBtn.disabled = !textarea.value.trim() && photos.length===0;
+      saveBtn.disabled = pendingPhotos>0 || (!textarea.value.trim() && photos.length===0);
     });
   }
   function renderPhotoStrip(){
+    if(!photoStrip) return;
     photoStrip.innerHTML='';
     photos.forEach((src,idx)=>{
       const d=document.createElement('div'); d.className='thumb';
-      d.innerHTML=`<img src="${src}" alt="รูปแนบ"><button class="rm" title="ลบรูป">✕</button>`;
-      d.querySelector('.rm').addEventListener('click', (e)=>{ e.stopPropagation(); photos.splice(idx,1); renderPhotoStrip(); saveBtn.disabled = !textarea.value.trim() && photos.length===0; });
+      d.innerHTML=`<img src="${esc(src)}" alt="รูปแนบ"><button class="rm" title="ลบรูป">✕</button>`;
+      d.querySelector('.rm').addEventListener('click', (e)=>{ e.stopPropagation(); photos.splice(idx,1); renderPhotoStrip(); saveBtn.disabled = pendingPhotos>0 || (!textarea.value.trim() && photos.length===0); });
       d.addEventListener('click', ()=> openPhotoViewer(photos, idx));
       photoStrip.appendChild(d);
     });
@@ -1045,12 +1055,12 @@ function wireComposer(root, onSave){
   saveBtn.addEventListener('click', ()=>{
     const txt = textarea.value.trim();
     if(!txt && !photos.length) return;
-    if(!parsed.time && txt) parsed = autoParse(txt);
+    parsed = txt ? autoParse(txt) : {time:null,tags:[],type:null,important:false};
     if(impBtn && impBtn.getAttribute('aria-pressed')==='true') parsed.important = true;
     onSave({
       time: parsed.time || (function(){const n=new Date();return pad(n.getHours())+':'+pad(n.getMinutes());})(),
       text: txt, tags: parsed.tags.map(t=>t.tag),
-      type: typeSelect ? (typeSelect.value || parsed.type) : parsed.type,
+      type: typeSelect ? ((typeManuallySet && typeSelect.value) || parsed.type) : parsed.type,
       status: statusSelect ? statusSelect.value : undefined,
       important: !!parsed.important, photos: photos.slice(),
     });
@@ -1082,6 +1092,14 @@ function compressDataUrl(dataUrl, maxWidth, quality){
 }
 
 /* ================= Render: Daily Work timeline ================= */
+// กะดึกคร่อมเที่ยงคืน (19:30–07:30) — เวลา 00:00–07:29 ของกะดึกต้องนับเป็น "วันถัดไป" ตอนเรียง
+function entryTimeKey(e){
+  const m = /^(\d{1,2}):(\d{2})/.exec(e.time||'');
+  if(!m) return 0;
+  let mins = parseInt(m[1],10)*60 + parseInt(m[2],10);
+  if(e.shift==='night' && mins<450) mins += 1440;
+  return mins;
+}
 function statusClass(status){ return status==='ปิดงานแล้ว'?'ok':(status==='เฝ้าระวัง'?'warn':'bad'); }
 function entryCardHtml(e, sectionKey){
   const tagsHtml = (e.tags||[]).map(t=>`<span class="chip tagchip">${esc(t)}</span>`).join('');
@@ -1092,8 +1110,8 @@ function entryCardHtml(e, sectionKey){
   const statusHtml = editable
     ? `<select class="chip-select ${statusClass(e.status)} entry-status-select" data-field="status">${buildSelectOptions(CONFIG.workStatuses, e.status||'')}</select>`
     : (e.status ? `<span class="chip ${statusClass(e.status)}">${esc(e.status)}</span>` : '');
-  const photosHtml = (e.photos&&e.photos.length) ? `<div class="photos">${e.photos.map(p=>`<div class="thumb"><img src="${p}" alt="รูปแนบ"></div>`).join('')}</div>` : '';
-  return `<div class="entry ${e.important?'red':''}" data-id="${e.id}" data-section="${sectionKey}">
+  const photosHtml = (e.photos&&e.photos.length) ? `<div class="photos">${e.photos.map(p=>`<div class="thumb"><img src="${esc(p)}" alt="รูปแนบ"></div>`).join('')}</div>` : '';
+  return `<div class="entry ${e.important?'red':''}" data-id="${esc(e.id)}" data-section="${sectionKey}">
     <div class="t-rail"><span class="t-time">${esc(e.time)}</span><span class="t-line"></span></div>
     <div class="entry-card">
       <div class="cardbtns">
@@ -1108,8 +1126,8 @@ function entryCardHtml(e, sectionKey){
   </div>`;
 }
 function renderDailyWork(){
-  const day = currentDay.dailyWork.filter(e=>e.shift==='day').sort((a,b)=>a.time.localeCompare(b.time));
-  const night = currentDay.dailyWork.filter(e=>e.shift==='night').sort((a,b)=>a.time.localeCompare(b.time));
+  const day = currentDay.dailyWork.filter(e=>e.shift==='day').sort((a,b)=>entryTimeKey(a)-entryTimeKey(b));
+  const night = currentDay.dailyWork.filter(e=>e.shift==='night').sort((a,b)=>entryTimeKey(a)-entryTimeKey(b));
   document.getElementById('dayTimeline').innerHTML = day.length ? day.map(e=>entryCardHtml(e,'dailyWork')).join('') : '<p class="empty-hint">ยังไม่มีบันทึกกะเช้า — พิมพ์ในช่องด้านบนเพื่อเริ่มบันทึก</p>';
   document.getElementById('nightTimeline').innerHTML = night.length ? night.map(e=>entryCardHtml(e,'dailyWork')).join('') : '<p class="empty-hint">ยังไม่มีบันทึกกะดึก</p>';
   wireEntryButtons();
@@ -1198,7 +1216,7 @@ function renderSafetyChecklist(){
 function renderAlarms(){
   document.getElementById('alarmTableBody').innerHTML = CONFIG.alarmTags.map(tag=>{
     const v = currentDay.alarms[tag] ?? 0;
-    return `<tr data-tag="${tag}"><td class="mono">${tag}</td><td class="num"><input class="cell-input num alarm-input" data-tag="${tag}" value="${v}"></td><td><span class="led ${alarmClass(v)}"></span></td></tr>`;
+    return `<tr data-tag="${tag}"><td class="mono">${tag}</td><td class="num"><input class="cell-input num alarm-input" data-tag="${tag}" value="${esc(v)}"></td><td><span class="led ${alarmClass(v)}"></span></td></tr>`;
   }).join('');
   document.querySelectorAll('.alarm-input').forEach(inp=>{
     inp.addEventListener('input', ()=>{
@@ -1243,7 +1261,7 @@ function buildSelectOptions(options, value){
 function renderSilo(){
   const rows = currentDay.silo;
   document.getElementById('siloTableBody').innerHTML = rows.map(r=>`
-    <tr data-id="${r.id}">
+    <tr data-id="${esc(r.id)}">
       <td><input class="cell-input silo-f" data-f="time" value="${esc(r.time)}" placeholder="00:00"></td>
       <td style="display:flex;gap:4px;align-items:center">
         <select class="cell-input silo-f" data-f="from" style="width:60px">${buildSelectOptions(CONFIG.siloIds, r.from)}</select>→
@@ -1388,7 +1406,7 @@ function renderSop(){
 function renderSap(){
   const rows = currentDay.sap;
   document.getElementById('sapTableBody').innerHTML = rows.map(r=>`
-    <tr data-id="${r.id}">
+    <tr data-id="${esc(r.id)}">
       <td><input class="cell-input sap-f mono" data-f="sapNo" value="${esc(r.sapNo)}" placeholder="SAP No."></td>
       <td><input class="cell-input sap-f" data-f="detail" value="${esc(r.detail)}" placeholder="รายละเอียด"></td>
       <td><select class="cell-input sap-f" data-f="status" style="padding-right:2px">
@@ -1621,7 +1639,7 @@ function filterHistory(q, chipQuery){
     if(!hits.length) return;
     total+=hits.length;
     const sec=document.createElement('div'); sec.className='hist-day';
-    sec.innerHTML = `<h3>📅 ${dateStr} <span class="cnt">(${hits.length} รายการ)</span> <button data-date="${dateStr}">ไปที่วันนี้ →</button></h3>`;
+    sec.innerHTML = `<h3>📅 ${esc(dateStr)} <span class="cnt">(${hits.length} รายการ)</span> <button data-date="${esc(dateStr)}">ไปที่วันนี้ →</button></h3>`;
     sec.querySelector('button').addEventListener('click', ()=>{
       goToDate(dateStr);
       document.querySelector('.tabs [data-tab="daily"]').click();
@@ -1710,6 +1728,7 @@ async function renderDayList(){
     btn.addEventListener('click', async ()=>{
       const dateStr = btn.closest('[data-date]').dataset.date;
       if(!confirm(`ลบข้อมูลวันที่ ${dateStr} ทั้งหมด? ไม่สามารถกู้คืนได้`)) return;
+      if(dateStr === currentDate){ clearTimeout(saveTimer); saveTimer=null; } // กัน debounce ค้างเขียนวันที่เพิ่งลบกลับมา
       await dbManager.delete(dateStr);
       toast(`ลบข้อมูลวันที่ ${dateStr} แล้ว`);
       if(dateStr === currentDate){ await goToDate(todayStr()); }
@@ -1730,6 +1749,7 @@ async function renderDayList(){
 async function clearAllData(){
   const keys = await dbManager.allKeys();
   if(!confirm(`ต้องการลบข้อมูลทั้งหมด ${keys.length} วัน? การกระทำนี้ไม่สามารถย้อนกลับได้`)) return;
+  clearTimeout(saveTimer); saveTimer=null; // กัน debounce ค้างเขียนข้อมูลกลับหลังล้าง
   await dbManager.clear();
   localStorage.removeItem('logbook_lastDate');
   location.reload();
@@ -1762,7 +1782,7 @@ function buildDaySummaryText(dateStr, day){
     alarmIssues.forEach(([tag,v])=>{ lines.push(`- ${tag}: ${v} ครั้ง`); });
     lines.push('');
   }
-  const important = (day.dailyWork||[]).filter(e=>e.important).sort((a,b)=>a.time.localeCompare(b.time));
+  const important = (day.dailyWork||[]).filter(e=>e.important).sort((a,b)=>entryTimeKey(a)-entryTimeKey(b));
   if(important.length){
     lines.push('⭐ เหตุการณ์สำคัญ:');
     important.forEach(e=>{ lines.push(`- ${e.time} ${e.text.split('\n')[0]}`); });
@@ -1784,13 +1804,18 @@ async function exportData(fromDate, toDate){
   toast('ส่งออกข้อมูลสำเร็จ!');
 }
 
-function csvEscape(s){ s=String(s??''); if(/[",\n]/.test(s)) return '"'+s.replace(/"/g,'""')+'"'; return s; }
+function csvEscape(s){
+  s=String(s??'');
+  if(/^[=+\-@\t\r]/.test(s)) s="'"+s; // กัน Excel ตีความเป็นสูตร (formula injection)
+  if(/[",\n]/.test(s)) return '"'+s.replace(/"/g,'""')+'"';
+  return s;
+}
 async function exportCsv(fromDate, toDate){
   const entries = await dbManager.allEntries();
   const filtered = entries.filter(([k])=> (!fromDate||k>=fromDate) && (!toDate||k<=toDate) ).sort((a,b)=>a[0].localeCompare(b[0]));
   const rows = [['Date','Time','Shift','EQ Tags','Type','Status','Details','Important','Author']];
   filtered.forEach(([dateStr, day])=>{
-    (day.dailyWork||[]).slice().sort((a,b)=>a.time.localeCompare(b.time)).forEach(e=>{
+    (day.dailyWork||[]).slice().sort((a,b)=>(a.shift==='night')-(b.shift==='night') || entryTimeKey(a)-entryTimeKey(b)).forEach(e=>{
       rows.push([dateStr, e.time, e.shift==='day'?'กะเช้า':'กะดึก', (e.tags||[]).join(' '), e.type||'', e.status||'', (e.text||'').replace(/\n/g,' / '), e.important?'YES':'', e.author||'']);
     });
   });
@@ -1801,16 +1826,34 @@ async function exportCsv(fromDate, toDate){
   a.download = `shift-logbook-dailywork-${fromDate||'all'}_${toDate||'all'}.csv`; a.click(); URL.revokeObjectURL(a.href);
   toast('ส่งออก CSV สำเร็จ!');
 }
+function sanitizeImportedDay(day){
+  ['dailyWork','qualityLog'].forEach(sec=>{
+    if(!Array.isArray(day[sec])){ day[sec]=[]; return; }
+    day[sec] = day[sec].filter(e=>e && typeof e==='object');
+    day[sec].forEach(e=>{
+      if(typeof e.id!=='string' || !/^[a-z0-9]+$/i.test(e.id)) e.id=uid();
+      e.tags = Array.isArray(e.tags) ? e.tags.filter(t=>typeof t==='string') : [];
+      e.photos = Array.isArray(e.photos) ? e.photos.filter(p=>typeof p==='string' && p.startsWith('data:image/')) : [];
+    });
+  });
+  ['silo','sap'].forEach(sec=>{
+    if(!Array.isArray(day[sec])){ day[sec]=[]; return; }
+    day[sec] = day[sec].filter(r=>r && typeof r==='object');
+    day[sec].forEach(r=>{ if(typeof r.id!=='string' || !/^[a-z0-9]+$/i.test(r.id)) r.id=uid(); });
+  });
+  return day;
+}
 document.getElementById('importFileInput').addEventListener('change', function(){
   const file=this.files[0]; if(!file) return;
   const reader=new FileReader();
   reader.onload=async(e)=>{
     try{
       const data=JSON.parse(e.target.result);
-      const keys=Object.keys(data);
-      if(!keys.length) throw new Error('ไฟล์ว่างเปล่า');
+      if(!data || typeof data!=='object' || Array.isArray(data)) throw new Error('รูปแบบไฟล์ไม่ถูกต้อง');
+      const keys=Object.keys(data).filter(k=>/^\d{4}-\d{2}-\d{2}$/.test(k) && data[k] && typeof data[k]==='object' && !Array.isArray(data[k]));
+      if(!keys.length) throw new Error('ไม่พบข้อมูลรายวันในไฟล์');
       if(!confirm(`นำเข้าข้อมูล ${keys.length} วัน? วันที่ซ้ำกับที่มีอยู่จะถูกเขียนทับ`)) return;
-      for(const k of keys){ await dbManager.set(k, data[k]); }
+      for(const k of keys){ await dbManager.set(k, sanitizeImportedDay(data[k])); }
       toast('นำเข้าข้อมูลสำเร็จ!');
       closeSettingsModal();
       currentDay = await loadDay(currentDate);
@@ -1836,7 +1879,7 @@ function openPhotoViewer(photos, startIndex){
     const multi = photos.length > 1;
     root.innerHTML = `
       <div class="pv-overlay"></div>
-      <div class="pv-modal"><img src="${photos[idx]}" alt="รูปแนบขนาดเต็ม"></div>
+      <div class="pv-modal"><img src="${esc(photos[idx])}" alt="รูปแนบขนาดเต็ม"></div>
       <button class="pv-close" title="ปิด (Esc)">✕</button>
       ${multi ? '<button class="pv-nav pv-prev" title="ก่อนหน้า">‹</button><button class="pv-nav pv-next" title="ถัดไป">›</button>' : ''}
       ${multi ? `<div class="pv-count">${idx+1} / ${photos.length}</div>` : ''}
