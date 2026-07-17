@@ -169,6 +169,8 @@ select.chip-select.neutral{background:var(--panel2);color:var(--muted);border-co
 .btn:hover{filter:brightness(.97)}
 .btn.primary{background:var(--accent);color:var(--on-accent);border-color:transparent;font-weight:700}
 .btn.danger-ghost[aria-pressed="true"]{background:var(--red-soft);color:var(--red);border-color:var(--red);font-weight:700}
+.btn.danger{background:var(--red-soft);color:var(--red);border-color:transparent;font-weight:700}
+.btn.danger:hover{filter:brightness(.95)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn.small{padding:4px 10px;font-size:12px}
 .photo-strip{display:flex;gap:8px;flex-wrap:wrap;padding:6px 0}
@@ -651,6 +653,7 @@ const dbManager = {
     keysReq.onerror=()=>reject(keysReq.error); valsReq.onerror=()=>reject(valsReq.error);
   }); },
   delete(key){ return new Promise((resolve,reject)=>{ const tx=this.db.transaction(CONFIG.store,'readwrite'); const r=tx.objectStore(CONFIG.store).delete(key); r.onsuccess=()=>resolve(); r.onerror=()=>reject(r.error); }); },
+  clear(){ return new Promise((resolve,reject)=>{ const tx=this.db.transaction(CONFIG.store,'readwrite'); const r=tx.objectStore(CONFIG.store).clear(); r.onsuccess=()=>resolve(); r.onerror=()=>reject(r.error); }); },
 };
 
 /* ================= Data model helpers ================= */
@@ -1578,34 +1581,166 @@ function filterHistory(q, chipQuery){
   if(!total) box.innerHTML = `<p class="no-result">ไม่พบรายการที่ตรงกับ "${esc(q||chipQuery)}"</p>`;
 }
 
-/* ================= Settings modal (backup / restore) ================= */
+/* ================= Settings modal (backup / restore / cleanup) ================= */
+function estimateSize(obj){ return new Blob([JSON.stringify(obj)]).size; }
+function formatBytes(bytes){
+  if(bytes < 1024) return bytes+' B';
+  if(bytes < 1024*1024) return (bytes/1024).toFixed(1)+' KB';
+  return (bytes/1024/1024).toFixed(2)+' MB';
+}
+
 function openSettingsModal(){
   const root = document.getElementById('settingsModalRoot');
   root.innerHTML = `
     <div class="modal-overlay"></div>
     <div class="modal"><div class="modal-card">
       <h3>จัดการข้อมูล <button class="iconbtn" id="closeSettings">✕</button></h3>
-      <div class="row"><div class="t"><b>สำรองข้อมูลทั้งหมด</b><span>ดาวน์โหลดไฟล์ .json เก็บไว้ หรือย้ายไปเครื่องอื่น</span></div><button class="btn primary" id="exportBtn">ส่งออก</button></div>
+
+      <div class="t" style="padding:8px 0 4px"><b>ช่วงวันที่สำหรับส่งออก</b><span class="note" style="display:block">เว้นว่าง = ส่งออกทั้งหมด</span></div>
+      <div style="display:flex;gap:8px;align-items:center;padding-bottom:10px">
+        <input type="date" id="exportFrom" class="cell-input" style="flex:1;border:1px solid var(--line)">
+        <span class="note">ถึง</span>
+        <input type="date" id="exportTo" class="cell-input" style="flex:1;border:1px solid var(--line)">
+      </div>
+      <div class="row"><div class="t"><span>ไฟล์ .json สำรองข้อมูล</span></div><button class="btn primary" id="exportBtn">ส่งออก JSON</button></div>
+      <div class="row"><div class="t"><span>CSV ของ Daily Work (เปิดใน Excel ได้)</span></div><button class="btn" id="exportCsvBtn">ส่งออก CSV</button></div>
       <div class="row"><div class="t"><b>นำเข้าข้อมูลจากไฟล์สำรอง</b><span>จะรวมกับข้อมูลปัจจุบัน (วันที่ซ้ำจะถูกเขียนทับ)</span></div><button class="btn" id="importBtn">นำเข้า</button></div>
-      <div class="row"><div class="t"><b>จำนวนวันที่มีข้อมูล</b><span id="dayCountText">—</span></div></div>
+      <div class="row"><div class="t"><b>พื้นที่จัดเก็บโดยประมาณ</b><span id="storageSizeText">—</span></div></div>
+
+      <div class="t" style="margin:14px 0 6px"><b>รายการวันที่มีข้อมูล</b><span class="note" style="display:block">📋 คัดลอกสรุปส่งเวร · 🗑️ ลบเฉพาะวันนั้น</span></div>
+      <div id="dayListContainer" style="max-height:220px;overflow-y:auto;border:1px solid var(--line);border-radius:8px"></div>
+
+      <div class="row" style="margin-top:14px"><div class="t"><b style="color:var(--red)">ลบข้อมูลทั้งหมด</b><span>ล้างทุกวันในเบราว์เซอร์นี้ ไม่สามารถกู้คืนได้</span></div><button class="btn danger" id="clearAllBtn">ลบทั้งหมด</button></div>
+
       <p class="note" style="margin-top:10px">💡 ข้อมูลตอนนี้เก็บอยู่ในเบราว์เซอร์นี้เท่านั้น (IndexedDB) ยังไม่ sync ข้ามเครื่อง/ข้ามคน — ใช้สำรอง/นำเข้าเพื่อย้ายข้อมูลไปเครื่องอื่นได้ก่อนที่จะมีฐานข้อมูลกลาง</p>
     </div></div>`;
   root.querySelector('.modal-overlay').addEventListener('click', closeSettingsModal);
   document.getElementById('closeSettings').addEventListener('click', closeSettingsModal);
-  document.getElementById('exportBtn').addEventListener('click', exportData);
+  document.getElementById('exportBtn').addEventListener('click', ()=>{
+    exportData(document.getElementById('exportFrom').value, document.getElementById('exportTo').value);
+  });
+  document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
+    exportCsv(document.getElementById('exportFrom').value, document.getElementById('exportTo').value);
+  });
   document.getElementById('importBtn').addEventListener('click', ()=>document.getElementById('importFileInput').click());
-  dbManager.allKeys().then(keys=>{ document.getElementById('dayCountText').textContent = keys.length+' วัน'; });
+  document.getElementById('clearAllBtn').addEventListener('click', clearAllData);
+  renderDayList();
 }
 function closeSettingsModal(){ document.getElementById('settingsModalRoot').innerHTML=''; }
 document.getElementById('settingsBtn').addEventListener('click', openSettingsModal);
 
-async function exportData(){
+async function renderDayList(){
+  const container = document.getElementById('dayListContainer');
+  if(!container) return;
   const entries = await dbManager.allEntries();
-  const obj = {}; entries.forEach(([k,v])=>obj[k]=v);
+  const sorted = entries.sort((a,b)=>b[0].localeCompare(a[0]));
+  let totalBytes = 0;
+  container.innerHTML = sorted.map(([dateStr, day])=>{
+    const size = estimateSize(day);
+    totalBytes += size;
+    const count = (day.dailyWork||[]).length;
+    return `<div class="row" data-date="${esc(dateStr)}" style="padding:8px 10px">
+      <div class="t"><b>${esc(dateStr)}</b><span>${count} รายการ · ${formatBytes(size)}</span></div>
+      <button class="btn small" data-act="summary" title="คัดลอกสรุปส่งเวร">📋</button>
+      <button class="btn small danger" data-act="del" title="ลบวันนี้">🗑️</button>
+    </div>`;
+  }).join('') || '<p class="empty-hint" style="border:none;margin:0">ยังไม่มีข้อมูล</p>';
+  const sizeEl = document.getElementById('storageSizeText');
+  if(sizeEl) sizeEl.textContent = `${formatBytes(totalBytes)} (${sorted.length} วัน)`;
+  container.querySelectorAll('[data-act="del"]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const dateStr = btn.closest('[data-date]').dataset.date;
+      if(!confirm(`ลบข้อมูลวันที่ ${dateStr} ทั้งหมด? ไม่สามารถกู้คืนได้`)) return;
+      await dbManager.delete(dateStr);
+      toast(`ลบข้อมูลวันที่ ${dateStr} แล้ว`);
+      if(dateStr === currentDate){ await goToDate(todayStr()); }
+      renderDayList();
+    });
+  });
+  container.querySelectorAll('[data-act="summary"]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const dateStr = btn.closest('[data-date]').dataset.date;
+      const day = await dbManager.get(dateStr);
+      const text = buildDaySummaryText(dateStr, day);
+      try{ await navigator.clipboard.writeText(text); toast('คัดลอกสรุปแล้ว วางใน LINE/อีเมลได้เลย'); }
+      catch(err){ toast('คัดลอกไม่สำเร็จ: '+err.message); }
+    });
+  });
+}
+
+async function clearAllData(){
+  const keys = await dbManager.allKeys();
+  if(!confirm(`ต้องการลบข้อมูลทั้งหมด ${keys.length} วัน? การกระทำนี้ไม่สามารถย้อนกลับได้`)) return;
+  await dbManager.clear();
+  localStorage.removeItem('logbook_lastDate');
+  location.reload();
+}
+
+function buildDaySummaryText(dateStr, day){
+  const lines = [];
+  lines.push(`สรุปกะประจำวันที่ ${dateStr}`);
+  lines.push(`ทีม: กะเช้า F/M ${day.crew.day.fm||'-'} / B/M ${day.crew.day.bm||'-'} · กะดึก F/M ${day.crew.night.fm||'-'} / B/M ${day.crew.night.bm||'-'}`);
+  lines.push('');
+  const kpiIssues = CONFIG.kpiItems.filter(item=>{
+    const dSt = kpiStatus(day.kpi[item.key].day, item.target);
+    const nSt = kpiStatus(day.kpi[item.key].night, item.target);
+    return dSt==='warn' || nSt==='warn';
+  });
+  if(kpiIssues.length){
+    lines.push('⚠️ KPI ที่เกิน target:');
+    kpiIssues.forEach(item=>{ lines.push(`- ${item.label}: เช้า ${day.kpi[item.key].day||'-'} / ดึก ${day.kpi[item.key].night||'-'} (target ${item.target})`); });
+    lines.push('');
+  }
+  const safetyIssues = Object.entries(day.safety||{}).filter(([,v])=>v!=='ok');
+  if(safetyIssues.length){
+    lines.push('🚨 Safety ผิดปกติ:');
+    safetyIssues.forEach(([k])=>{ lines.push(`- ${SAFETY_LABELS[k]||k}`); });
+    lines.push('');
+  }
+  const alarmIssues = Object.entries(day.alarms||{}).filter(([,v])=>parseInt(v,10)>0);
+  if(alarmIssues.length){
+    lines.push('🔔 Alarm ที่เกิดขึ้น:');
+    alarmIssues.forEach(([tag,v])=>{ lines.push(`- ${tag}: ${v} ครั้ง`); });
+    lines.push('');
+  }
+  const important = (day.dailyWork||[]).filter(e=>e.important).sort((a,b)=>a.time.localeCompare(b.time));
+  if(important.length){
+    lines.push('⭐ เหตุการณ์สำคัญ:');
+    important.forEach(e=>{ lines.push(`- ${e.time} ${e.text.split('\n')[0]}`); });
+  } else {
+    lines.push('ไม่มีเหตุการณ์สำคัญที่ทำเครื่องหมายไว้');
+  }
+  return lines.join('\n');
+}
+
+async function exportData(fromDate, toDate){
+  const entries = await dbManager.allEntries();
+  const filtered = entries.filter(([k])=> (!fromDate||k>=fromDate) && (!toDate||k<=toDate) );
+  if(!filtered.length){ toast('ไม่มีข้อมูลในช่วงที่เลือก'); return; }
+  const obj = {}; filtered.forEach(([k,v])=>obj[k]=v);
   const blob = new Blob([JSON.stringify(obj,null,2)], {type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download = `shift-logbook-backup-${todayStr()}.json`; a.click(); URL.revokeObjectURL(a.href);
+  const suffix = (fromDate||toDate) ? `_${fromDate||'start'}_${toDate||'end'}` : '';
+  a.download = `shift-logbook-backup-${todayStr()}${suffix}.json`; a.click(); URL.revokeObjectURL(a.href);
   toast('ส่งออกข้อมูลสำเร็จ!');
+}
+
+function csvEscape(s){ s=String(s??''); if(/[",\n]/.test(s)) return '"'+s.replace(/"/g,'""')+'"'; return s; }
+async function exportCsv(fromDate, toDate){
+  const entries = await dbManager.allEntries();
+  const filtered = entries.filter(([k])=> (!fromDate||k>=fromDate) && (!toDate||k<=toDate) ).sort((a,b)=>a[0].localeCompare(b[0]));
+  const rows = [['Date','Time','Shift','EQ Tags','Type','Status','Details','Important','Author']];
+  filtered.forEach(([dateStr, day])=>{
+    (day.dailyWork||[]).slice().sort((a,b)=>a.time.localeCompare(b.time)).forEach(e=>{
+      rows.push([dateStr, e.time, e.shift==='day'?'กะเช้า':'กะดึก', (e.tags||[]).join(' '), e.type||'', e.status||'', (e.text||'').replace(/\n/g,' / '), e.important?'YES':'', e.author||'']);
+    });
+  });
+  if(rows.length===1){ toast('ไม่มีข้อมูล Daily Work ในช่วงที่เลือก'); return; }
+  const csv = rows.map(r=>r.map(csvEscape).join(',')).join('\r\n');
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download = `shift-logbook-dailywork-${fromDate||'all'}_${toDate||'all'}.csv`; a.click(); URL.revokeObjectURL(a.href);
+  toast('ส่งออก CSV สำเร็จ!');
 }
 document.getElementById('importFileInput').addEventListener('change', function(){
   const file=this.files[0]; if(!file) return;
