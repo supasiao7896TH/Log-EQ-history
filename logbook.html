@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Shift Log Book — PTA1</title>
+<style>
+:root{
+  --bg:#EFF3F4; --panel:#FFFFFF; --panel2:#F6F9FA; --ink:#1A2B36; --muted:#5C7180;
+  --line:#D8E1E5; --accent:#0E8C9C; --accent-soft:#E3F0F2; --on-accent:#FFFFFF;
+  --red:#C94040; --red-soft:#F9ECEC; --amber:#B97F1E; --amber-soft:#F7EFDE;
+  --green:#35855C; --green-soft:#E4F1EA; --shadow:0 1px 3px rgba(26,43,54,.08),0 4px 14px rgba(26,43,54,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#101B23; --panel:#182833; --panel2:#14222C; --ink:#E4EDF1; --muted:#8FA6B2;
+    --line:#243946; --accent:#3FC1D3; --accent-soft:#143038; --on-accent:#0B1418;
+    --red:#E76A6A; --red-soft:#33201F; --amber:#E0A84E; --amber-soft:#31281A;
+    --green:#57B384; --green-soft:#16302A; --shadow:0 1px 3px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101B23; --panel:#182833; --panel2:#14222C; --ink:#E4EDF1; --muted:#8FA6B2;
+  --line:#243946; --accent:#3FC1D3; --accent-soft:#143038; --on-accent:#0B1418;
+  --red:#E76A6A; --red-soft:#33201F; --amber:#E0A84E; --amber-soft:#31281A;
+  --green:#57B384; --green-soft:#16302A; --shadow:0 1px 3px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);
+}
+:root[data-theme="light"]{
+  --bg:#EFF3F4; --panel:#FFFFFF; --panel2:#F6F9FA; --ink:#1A2B36; --muted:#5C7180;
+  --line:#D8E1E5; --accent:#0E8C9C; --accent-soft:#E3F0F2; --on-accent:#FFFFFF;
+  --red:#C94040; --red-soft:#F9ECEC; --amber:#B97F1E; --amber-soft:#F7EFDE;
+  --green:#35855C; --green-soft:#E4F1EA; --shadow:0 1px 3px rgba(26,43,54,.08),0 4px 14px rgba(26,43,54,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"Leelawadee UI","Segoe UI",Thonburi,"Noto Sans Thai",sans-serif;
+  font-size:15px; line-height:1.55;
+}
+.mono{font-family:"Cascadia Mono",Consolas,"SF Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+button:focus-visible,input:focus-visible,a:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+input,textarea,select{font:inherit;color:inherit}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- App bar ---------- */
+.appbar{
+  position:sticky;top:0;z-index:30;background:var(--panel);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-mark{
+  width:34px;height:34px;border-radius:8px;background:var(--accent);color:var(--on-accent);
+  display:grid;place-items:center;font-weight:700;font-size:13px;letter-spacing:.5px;flex:none;
+}
+.brand h1{font-size:16px;font-weight:700;line-height:1.2;white-space:nowrap}
+.brand .sub{font-size:11.5px;color:var(--muted);letter-spacing:.4px}
+.appbar .spacer{flex:1}
+.datenav{display:flex;align-items:center;gap:4px}
+.datenav button{width:28px;height:28px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);font-size:14px}
+.datenav button:hover{background:var(--accent-soft)}
+.datenav input[type=date]{
+  font-size:13.5px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;
+  padding:4px 8px;color:var(--ink);
+}
+.todaybtn{font-size:11.5px;color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:4px 9px;white-space:nowrap}
+.seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:3px;gap:2px}
+.seg button{padding:4px 12px;border-radius:6px;font-size:13px;color:var(--muted);white-space:nowrap;transition:background .15s,color .15s}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);font-weight:600}
+.iconbtn{width:32px;height:32px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);font-size:15px;display:grid;place-items:center}
+.iconbtn:hover{background:var(--accent-soft)}
+
+/* ---------- Tabs ---------- */
+.tabs{
+  position:sticky;top:55px;z-index:25;background:var(--bg);
+  display:flex;gap:4px;padding:10px 16px 0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);
+}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{
+  padding:8px 14px 10px;font-size:13.5px;color:var(--muted);white-space:nowrap;
+  border-bottom:2.5px solid transparent;margin-bottom:-1px;transition:color .15s;
+}
+.tabs button[aria-selected="true"]{color:var(--accent);font-weight:700;border-bottom-color:var(--accent)}
+@media (max-width:720px){ .tabs{top:0;position:sticky} .appbar{position:static} }
+
+/* ---------- Layout ---------- */
+main{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
+.tabpane{display:none}
+.tabpane.active{display:block;animation:fadeup .2s ease}
+@keyframes fadeup{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px}
+.card h2{font-size:14.5px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card h2 .hint{font-size:11.5px;font-weight:400;color:var(--muted);margin-left:auto}
+.section-gap{margin-top:14px}
+
+/* ---------- LEDs & chips ---------- */
+.led{display:inline-block;width:10px;height:10px;border-radius:2.5px;flex:none;vertical-align:middle}
+.led.ok{background:var(--green)} .led.warn{background:var(--amber)} .led.bad{background:var(--red)} .led.off{background:var(--line)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:2px 9px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);color:var(--muted)}
+.tagchip{font-family:"Cascadia Mono",Consolas,ui-monospace,monospace;font-size:11.5px;background:var(--accent-soft);color:var(--accent);border:1px solid transparent;font-weight:600;letter-spacing:.3px}
+.typechip{background:var(--panel2)}
+.chip.ok{background:var(--green-soft);color:var(--green);border-color:transparent}
+.chip.warn{background:var(--amber-soft);color:var(--amber);border-color:transparent}
+.chip.bad{background:var(--red-soft);color:var(--red);border-color:transparent}
+
+/* ---------- Tables ---------- */
+.scroll-x{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600;text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-family:"Cascadia Mono",Consolas,ui-monospace,monospace;font-variant-numeric:tabular-nums;font-size:13px}
+.kpi-flag{color:var(--amber);font-weight:700}
+.cell-input{
+  width:100%;border:1px solid transparent;background:transparent;border-radius:6px;padding:4px 6px;
+  font-size:13.5px;transition:border-color .15s,background .15s;
+}
+.cell-input:hover{border-color:var(--line)}
+.cell-input:focus{border-color:var(--accent);background:var(--panel2)}
+.cell-input.num{text-align:right;font-family:"Cascadia Mono",Consolas,ui-monospace,monospace}
+.rowdel{width:24px;height:24px;border-radius:6px;color:var(--muted);font-size:13px}
+.rowdel:hover{background:var(--red-soft);color:var(--red)}
+.addrow{font-size:12.5px;color:var(--accent);padding:6px 4px;margin-top:4px}
+.addrow:hover{text-decoration:underline}
+
+/* ---------- Stats ---------- */
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat .label{font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.stat .value{font-size:24px;font-weight:700;font-family:"Cascadia Mono",Consolas,ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.stat .value small{font-size:12px;color:var(--muted);font-weight:400;font-family:"Leelawadee UI","Segoe UI",sans-serif}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .2s}
+
+/* ---------- Crew ---------- */
+.crew{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.crew .person{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:6px 10px}
+.crew .avatar{width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:11.5px;flex:none}
+.crew .role{font-size:10px;color:var(--muted);display:block;letter-spacing:.4px}
+.crew input{border:none;background:transparent;font-size:13px;width:88px}
+
+/* ---------- Composer ---------- */
+.composer{border:1.5px solid var(--accent);border-radius:12px;background:var(--panel);box-shadow:var(--shadow);padding:14px 16px}
+.composer .head{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.composer .head b{color:var(--ink)}
+.composer textarea{
+  width:100%;border:none;background:transparent;resize:vertical;min-height:56px;
+  font-size:15px;line-height:1.5;outline:none;
+}
+.composer textarea::placeholder{color:var(--muted);opacity:.7}
+.live-parse{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:28px;padding:4px 0}
+.live-parse .plabel{font-size:11.5px;color:var(--muted);letter-spacing:.3px}
+.composer-fields{display:flex;gap:16px;flex-wrap:wrap;padding:4px 0 8px}
+.composer-fields label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.composer-fields select{
+  font-size:13px;padding:4px 8px;border-radius:7px;border:1px solid var(--line);
+  background:var(--panel2);color:var(--ink);
+}
+select.chip-select{border-radius:999px;padding:2px 8px;font-size:12px;border:1px solid transparent;cursor:pointer}
+select.chip-select.ok{background:var(--green-soft);color:var(--green)}
+select.chip-select.warn{background:var(--amber-soft);color:var(--amber)}
+select.chip-select.bad{background:var(--red-soft);color:var(--red)}
+select.chip-select.neutral{background:var(--panel2);color:var(--muted);border-color:var(--line)}
+.composer .foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:10px;margin-top:6px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:13.5px;border:1px solid var(--line);background:var(--panel2);transition:filter .15s}
+.btn:hover{filter:brightness(.97)}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:transparent;font-weight:700}
+.btn.danger-ghost[aria-pressed="true"]{background:var(--red-soft);color:var(--red);border-color:var(--red);font-weight:700}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.small{padding:4px 10px;font-size:12px}
+.photo-strip{display:flex;gap:8px;flex-wrap:wrap;padding:6px 0}
+.thumb{position:relative;width:74px;height:74px;border-radius:8px;overflow:hidden;border:1px solid var(--line);flex:none;cursor:pointer}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .rm{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:11px;line-height:20px;text-align:center}
+.attach-menu{position:relative}
+.attach-pop{
+  position:absolute;bottom:calc(100% + 6px);left:0;background:var(--panel);border:1px solid var(--line);
+  border-radius:10px;box-shadow:var(--shadow);padding:6px;display:none;min-width:230px;z-index:10;
+}
+.attach-pop.open{display:block}
+.attach-pop button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 10px;border-radius:8px;font-size:13.5px}
+.attach-pop button:hover{background:var(--panel2)}
+.attach-pop .d{font-size:11px;color:var(--muted);display:block}
+.paste-hint{font-size:12px;color:var(--accent);background:var(--accent-soft);border-radius:8px;padding:8px 12px;margin-top:8px;display:none}
+.paste-hint.show{display:block}
+
+/* ---------- Timeline ---------- */
+.shift-head{display:flex;align-items:center;gap:10px;margin:22px 0 10px;font-weight:700;font-size:14px}
+.shift-head .crewline{font-weight:400;font-size:12px;color:var(--muted)}
+.shift-head::after{content:"";flex:1;height:1px;background:var(--line)}
+.timeline{display:flex;flex-direction:column;gap:10px}
+.entry{display:grid;grid-template-columns:56px 1fr;gap:10px}
+.entry .t-rail{display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:14px}
+.entry .t-time{font-family:"Cascadia Mono",Consolas,ui-monospace,monospace;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.entry .t-line{width:2px;flex:1;background:var(--line);border-radius:1px}
+.entry-card{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:12px 14px;position:relative}
+.entry-card .body{white-space:pre-line;font-size:14.5px}
+.entry-card .meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}
+.entry-card .cardbtns{position:absolute;top:8px;right:8px;display:flex;gap:2px}
+.entry-card .star,.entry-card .del{font-size:15px;opacity:.35;padding:4px;transition:opacity .15s,transform .15s;border-radius:6px}
+.entry-card .star:hover{opacity:.9;transform:scale(1.1)}
+.entry-card .del:hover{opacity:.9;background:var(--red-soft);color:var(--red)}
+.entry.red .entry-card{border-left-color:var(--red);background:linear-gradient(to right,var(--red-soft),var(--panel) 55%)}
+.entry.red .entry-card .body{color:var(--red);font-weight:600}
+.entry.red .entry-card .star{opacity:1}
+.entry .photos{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.entry .photos .thumb{width:90px;height:66px}
+.byline{font-size:11.5px;color:var(--muted);margin-top:8px}
+.empty-hint{color:var(--muted);font-size:13.5px;text-align:center;padding:20px;border:1px dashed var(--line);border-radius:10px}
+
+/* ---------- Checklist ---------- */
+.checkrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.checkrow:last-child{border-bottom:none}
+.checkrow .name{flex:1;min-width:180px}
+.miniseg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:2px;gap:2px}
+.miniseg button{padding:3px 11px;border-radius:5px;font-size:12px;color:var(--muted)}
+.miniseg button[aria-pressed="true"].ok-opt{background:var(--green-soft);color:var(--green);font-weight:700}
+.miniseg button[aria-pressed="true"].bad-opt{background:var(--red-soft);color:var(--red);font-weight:700}
+.miniseg button[aria-pressed="true"].yes-opt{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.sop{list-style:none}
+.sop li{display:flex;gap:9px;align-items:flex-start;padding:6px 0;font-size:13px;color:var(--muted);border-bottom:1px solid var(--line)}
+.sop li:last-child{border-bottom:none}
+.sop li input[type=checkbox]{margin-top:3px;flex:none;accent-color:var(--accent);width:15px;height:15px}
+.sop li.done{opacity:.5;text-decoration:line-through}
+.sop .freq{font-size:11px;background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:0 6px;white-space:nowrap;margin-left:auto}
+.sop .txt{flex:1}
+
+/* ---------- NaOH washing / batch checklist ---------- */
+.naoh-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);flex-wrap:wrap;font-size:13.5px}
+.naoh-row:last-child{border-bottom:none}
+.naoh-row.naoh-sub{padding-top:0;padding-bottom:12px}
+.naoh-label{flex:1;min-width:200px}
+.naoh-sub-label{color:var(--muted);font-size:12.5px;display:flex;align-items:center;gap:6px}
+.naoh-time{width:64px;text-align:center;flex:none}
+.naoh-total-input{width:52px;display:inline-block;text-align:center}
+.unit-group{display:flex;gap:6px}
+.unit-chip{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);font-weight:700;font-size:13px;flex:none}
+.unit-chip:hover{border-color:var(--accent)}
+.unit-chip[aria-pressed="true"]{background:var(--green-soft);color:var(--green);border-color:transparent}
+.batch-no-group .unit-chip{width:26px;height:26px;font-size:12px}
+
+/* ---------- History ---------- */
+.searchbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.searchbar input{
+  flex:1;min-width:220px;padding:9px 14px;border-radius:9px;border:1px solid var(--line);
+  background:var(--panel);font-size:14px;
+}
+.filter-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.filter-chips .chip{cursor:pointer;transition:background .15s}
+.filter-chips .chip[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.hist-day{margin-bottom:16px}
+.hist-day h3{font-size:13px;color:var(--muted);font-weight:700;margin-bottom:8px;display:flex;gap:8px;align-items:center}
+.hist-day h3 .cnt{font-weight:400;font-size:11.5px}
+.hist-day h3 button{font-size:11.5px;color:var(--accent)}
+.hist-item{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:10px 13px;margin-bottom:7px;font-size:13.5px;display:flex;gap:10px;align-items:baseline;cursor:pointer}
+.hist-item:hover{border-color:var(--accent)}
+.hist-item .ht{font-family:"Cascadia Mono",Consolas,ui-monospace,monospace;font-size:12px;color:var(--muted);flex:none}
+.hist-item mark{background:var(--amber-soft);color:var(--amber);border-radius:3px;padding:0 2px}
+.hist-item.red-item{border-left:3px solid var(--red)}
+.hist-item.red-item .htxt{color:var(--red);font-weight:600}
+.no-result{color:var(--muted);font-size:13.5px;text-align:center;padding:24px}
+
+/* ---------- Modal (settings) ---------- */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,18,24,.5);z-index:60}
+.modal{position:fixed;inset:0;z-index:61;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-card{background:var(--panel);border-radius:14px;box-shadow:var(--shadow);max-width:480px;width:100%;padding:20px;max-height:85vh;overflow-y:auto}
+.modal-card h3{font-size:16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.modal-card .row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.modal-card .row:last-child{border-bottom:none}
+.modal-card .row .t{flex:1}
+.modal-card .row .t b{display:block;font-size:13.5px}
+.modal-card .row .t span{font-size:11.5px;color:var(--muted)}
+.hidden{display:none!important}
+
+/* ---------- Photo viewer (lightbox) ---------- */
+.pv-overlay{position:fixed;inset:0;background:rgba(6,10,14,.85);z-index:80}
+.pv-modal{position:fixed;inset:0;z-index:81;display:flex;align-items:center;justify-content:center;padding:20px}
+.pv-modal img{max-width:100%;max-height:82vh;display:block;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.pv-close{position:fixed;top:18px;right:18px;z-index:82;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;font-size:18px;display:grid;place-items:center}
+.pv-close:hover{background:rgba(255,255,255,.22)}
+.pv-nav{position:fixed;top:50%;transform:translateY(-50%);z-index:82;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;font-size:24px;display:grid;place-items:center;line-height:1}
+.pv-nav:hover{background:rgba(255,255,255,.22)}
+.pv-prev{left:16px} .pv-next{right:16px}
+.pv-count{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:82;color:#fff;font-size:12.5px;background:rgba(255,255,255,.12);padding:4px 12px;border-radius:999px}
+@media (max-width:560px){ .pv-nav{width:38px;height:38px;font-size:20px} .pv-prev{left:6px} .pv-next{right:6px} }
+
+/* ---------- Misc ---------- */
+.note{font-size:12px;color:var(--muted)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+footer{max-width:1080px;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:12px;text-align:center}
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--ink);color:var(--bg);padding:10px 20px;border-radius:10px;font-size:13.5px;
+  transition:transform .25s ease;z-index:70;box-shadow:var(--shadow);max-width:90vw;text-align:center;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@media (max-width:560px){
+  .entry{grid-template-columns:46px 1fr}
+  .brand h1{font-size:14.5px}
+  main{padding:14px 10px 50px}
+  .card{padding:13px}
+}
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <div class="brand">
+    <div class="brand-mark">P1</div>
+    <div>
+      <h1>Digital Shift Log Book</h1>
+      <span class="sub">GC-M PTA PLANT · PTA1 FM Activity</span>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <div class="datenav">
+    <button id="prevDayBtn" title="วันก่อนหน้า">◀</button>
+    <input type="date" id="dateInput">
+    <button id="nextDayBtn" title="วันถัดไป">▶</button>
+    <button class="todaybtn" id="todayBtn">วันนี้</button>
+  </div>
+  <div class="seg" role="group" aria-label="เลือกกะ">
+    <button id="segDay" aria-pressed="true">☀️ กะเช้า</button>
+    <button id="segNight" aria-pressed="false">🌙 กะดึก</button>
+  </div>
+  <button class="iconbtn" id="settingsBtn" title="จัดการข้อมูล / สำรองข้อมูล">⚙️</button>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="หมวดข้อมูล">
+  <button role="tab" aria-selected="true"  data-tab="overview">ภาพรวม</button>
+  <button role="tab" aria-selected="false" data-tab="daily">Daily Work</button>
+  <button role="tab" aria-selected="false" data-tab="quality">Quality &amp; Safety</button>
+  <button role="tab" aria-selected="false" data-tab="silo">Silo &amp; Loading</button>
+  <button role="tab" aria-selected="false" data-tab="sap">SAP &amp; งาน MT</button>
+  <button role="tab" aria-selected="false" data-tab="steam">Steam &amp; Checks</button>
+  <button role="tab" aria-selected="false" data-tab="history">🔎 ย้อนหลัง</button>
+</nav>
+
+<main>
+
+<!-- ============ TAB: OVERVIEW ============ -->
+<section class="tabpane active" id="pane-overview">
+  <div class="grid g3">
+    <div class="card">
+      <div class="stat">
+        <span class="label">Total Product</span>
+        <span class="value"><input class="cell-input num" id="ov-totalProduct" style="font-size:24px" placeholder="0"><small>T/day</small></span>
+      </div>
+      <p class="note" style="margin-top:6px">รวมยอดผลิตทั้งสองกะของวันนี้</p>
+    </div>
+    <div class="card">
+      <div class="stat">
+        <span class="label">ระดับถัง TTK-400 (เช้า → ดึก)</span>
+        <span class="value" style="display:flex;gap:6px;align-items:baseline">
+          <input class="cell-input num" id="ov-ttkDay" style="width:70px" placeholder="0">→
+          <input class="cell-input num" id="ov-ttkNight" style="width:70px" placeholder="0"> <small>ton</small>
+        </span>
+      </div>
+      <div class="stat" style="margin-top:8px">
+        <span class="label">TK-401 (เช้า → ดึก)</span>
+        <span class="value" style="font-size:16px;display:flex;gap:6px;align-items:baseline">
+          <input class="cell-input num" id="ov-tk401Day" style="width:50px;font-size:16px" placeholder="0">→
+          <input class="cell-input num" id="ov-tk401Night" style="width:50px;font-size:16px" placeholder="0">
+        </span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="stat">
+        <span class="label">Critical Alarms วันนี้</span>
+        <span class="value" id="ov-alarmTotal">0 <small>รายการ</small></span>
+      </div>
+      <div class="legend" id="ov-alarmLeds"></div>
+    </div>
+  </div>
+
+  <div class="grid g2 section-gap">
+    <div class="card">
+      <h2>ทีมประจำกะ <span class="hint">F/M = Field · B/M = Board</span></h2>
+      <p class="note" style="margin-bottom:8px">☀️ กะเช้า 08:00 – 20:00</p>
+      <div class="crew">
+        <div class="person"><span class="avatar">F</span><span><span class="role">F/M</span><input id="crew-day-fm" placeholder="ชื่อ"></span></div>
+        <div class="person"><span class="avatar">B</span><span><span class="role">B/M</span><input id="crew-day-bm" placeholder="ชื่อ"></span></div>
+      </div>
+      <p class="note" style="margin:12px 0 8px">🌙 กะดึก 20:00 – 08:00</p>
+      <div class="crew">
+        <div class="person"><span class="avatar">F</span><span><span class="role">F/M</span><input id="crew-night-fm" placeholder="ชื่อ"></span></div>
+        <div class="person"><span class="avatar">B</span><span><span class="role">B/M</span><input id="crew-night-bm" placeholder="ชื่อ"></span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>สถานะรวม Safety &amp; Environment <span class="hint">แก้ไขได้ในแท็บ Quality &amp; Safety</span></h2>
+      <div id="ov-safetySummary"></div>
+    </div>
+  </div>
+
+  <div class="card section-gap">
+    <h2>KPI Summary <span class="hint">ค่าออกนอก target ระบบไฮไลต์ให้อัตโนมัติ</span></h2>
+    <div class="scroll-x">
+      <table>
+        <thead><tr><th>Item</th><th>Target</th><th class="num">☀️ กะเช้า</th><th class="num">🌙 กะดึก</th><th>สถานะ</th></tr></thead>
+        <tbody id="kpiTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card section-gap">
+    <h2>เหตุการณ์สำคัญวันนี้ <span class="hint">รายการที่ทำเครื่องหมาย ⭐ ตัวแดง</span></h2>
+    <div id="ov-important"></div>
+  </div>
+</section>
+
+<!-- ============ TAB: DAILY WORK ============ -->
+<section class="tabpane" id="pane-daily">
+  <div class="composer" data-section="dailyWork">
+    <div class="head">
+      <b>⚡ บันทึกเหตุการณ์ใหม่</b>
+      <span>พิมพ์ประโยคเดียว — ระบบแยก เวลา / รหัส EQ / ประเภท ให้อัตโนมัติ</span>
+    </div>
+    <textarea class="composerText" placeholder="เช่น  14:20 พบ PM-901 เสียงดังผิดปกติ สายพานสั่น แจ้ง ME ตรวจสอบ"></textarea>
+    <div class="live-parse"><span class="plabel">🤖 ตรวจพบอัตโนมัติ:</span><span class="note">— เริ่มพิมพ์เพื่อดูการแยกข้อมูล —</span></div>
+    <div class="composer-fields">
+      <label>ประเภทงาน <select class="typeSelect"><option value="">— อัตโนมัติ —</option></select></label>
+      <label>สถานะ <select class="statusSelect"></select></label>
+    </div>
+    <div class="photo-strip"></div>
+    <div class="paste-hint">💬 เปิดแชท LINE บนเครื่องนี้ → กดค้างที่รูป → Copy → กลับมาหน้านี้แล้ววาง (Ctrl+V) รูปจะแนบให้ทันที</div>
+    <div class="foot">
+      <div class="attach-menu">
+        <button class="btn attachBtn">📎 แนบรูป</button>
+        <div class="attach-pop">
+          <button data-act="camera">📷 ถ่ายรูป<span class="d">เปิดกล้องมือถือทันที</span></button>
+          <button data-act="gallery">🖼️ เลือกจากคลังภาพ<span class="d">รูปในเครื่อง / ที่เซฟไว้</span></button>
+          <button data-act="paste">💬 วางรูปจาก LINE<span class="d">คัดลอกจากแชทแล้ววางที่นี่</span></button>
+        </div>
+      </div>
+      <button class="btn danger-ghost impBtn" aria-pressed="false">⭐ ทำตัวแดง (สำคัญ)</button>
+      <span style="flex:1"></span>
+      <button class="btn primary saveBtn" disabled>บันทึกลง Log</button>
+    </div>
+    <input type="file" class="fileInput" accept="image/*" multiple style="display:none">
+  </div>
+
+  <div class="shift-head" id="dayHead">☀️ กะเช้า 08:00 – 20:00 <span class="crewline" id="dayCrewline"></span></div>
+  <div class="timeline" id="dayTimeline"></div>
+
+  <div class="shift-head" id="nightHead">🌙 กะดึก 20:00 – 08:00 <span class="crewline" id="nightCrewline"></span></div>
+  <div class="timeline" id="nightTimeline"></div>
+</section>
+
+<!-- ============ TAB: QUALITY & SAFETY ============ -->
+<section class="tabpane" id="pane-quality">
+  <div class="grid g2">
+    <div class="card">
+      <h2>Quality Control Log</h2>
+      <div class="composer" data-section="qualityLog" style="padding:10px 12px;margin-bottom:12px">
+        <textarea class="composerText" style="min-height:40px;font-size:13.5px" placeholder="เช่น 07:40 Dec PC-2201 จาก 77.7 → 77.3 · 4-CBA = 13.4 ppm"></textarea>
+        <div class="live-parse" style="min-height:22px"></div>
+        <div class="foot" style="padding-top:6px;margin-top:4px">
+          <button class="btn small primary saveBtn" disabled>บันทึก</button>
+        </div>
+      </div>
+      <div class="timeline" id="qualityTimeline"></div>
+    </div>
+    <div>
+      <div class="card">
+        <h2>Quality of CTA <span class="hint">checkpoint 18:00</span></h2>
+        <table>
+          <tbody>
+            <tr><td>4-CBA (Q/T)</td><td class="num"><input class="cell-input num" id="q-cta4cba" placeholder="0"></td></tr>
+            <tr><td>T-340</td><td class="num"><input class="cell-input num" id="q-ctaT340" placeholder="0"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card section-gap">
+        <h2>Recovery Residue (Batch)</h2>
+        <div class="grid g2">
+          <div class="stat"><span class="label">M (เช้า)</span><input class="cell-input num" id="q-recovM" style="font-size:20px" placeholder="0"></div>
+          <div class="stat"><span class="label">N (ดึก)</span><input class="cell-input num" id="q-recovN" style="font-size:20px" placeholder="0"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g2 section-gap">
+    <div class="card">
+      <h2>Safety / Environment Checklist <span class="hint">แตะเพื่อสลับสถานะ</span></h2>
+      <div id="safetyChecklist"></div>
+    </div>
+    <div class="card">
+      <h2>Critical Alarm List <span class="hint">ใส่จำนวนครั้งที่แจ้งเตือน</span></h2>
+      <table>
+        <thead><tr><th>Alarm Tag</th><th class="num">จำนวนครั้ง</th><th>สถานะ</th></tr></thead>
+        <tbody id="alarmTableBody"></tbody>
+      </table>
+      <div class="legend"><span><span class="led ok"></span>ไม่มี alarm</span><span><span class="led warn"></span>1–2 ครั้ง</span><span><span class="led bad"></span>≥ 3 ครั้ง</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TAB: SILO & LOADING ============ -->
+<section class="tabpane" id="pane-silo">
+  <div class="card">
+    <h2>Silo Operation</h2>
+    <div class="scroll-x">
+      <table>
+        <thead><tr><th>เวลา</th><th>From → To</th><th>Destination</th><th>หมายเหตุ</th><th></th></tr></thead>
+        <tbody id="siloTableBody"></tbody>
+      </table>
+    </div>
+    <button class="addrow" id="addSiloRow">+ เพิ่มรายการ Silo</button>
+  </div>
+
+  <div class="grid g2 section-gap">
+    <div class="card">
+      <h2>Plan Loading</h2>
+      <table>
+        <thead><tr><th>Tank</th><th class="num">Weight (T)</th><th style="width:35%"></th></tr></thead>
+        <tbody id="planLoadingBody"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h2>รายการเตือน SOP ประจำ <span class="hint">ติ๊กเมื่อทำแล้ววันนี้</span></h2>
+      <ul class="sop" id="sopList"></ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TAB: SAP & MT ============ -->
+<section class="tabpane" id="pane-sap">
+  <div class="card">
+    <h2>งาน SAP / MT / Memo</h2>
+    <div class="scroll-x">
+      <table>
+        <thead><tr><th>SAP No.</th><th>รายละเอียด</th><th>สถานะ</th><th>Remark</th><th></th></tr></thead>
+        <tbody id="sapTableBody"></tbody>
+      </table>
+    </div>
+    <button class="addrow" id="addSapRow">+ เพิ่มงาน SAP</button>
+  </div>
+  <div class="grid g3 section-gap">
+    <div class="card"><div class="stat"><span class="label">Work Permit ทั้งหมด</span><span class="value" id="wp-total">0</span></div></div>
+    <div class="card"><div class="stat"><span class="label">คงเหลือ (Remain)</span><span class="value" id="wp-remain">0</span></div></div>
+    <div class="card"><div class="stat"><span class="label">ปิด Permit ล่าสุด</span><span class="value"><input class="cell-input" id="wp-closeTime" placeholder="19:00" style="font-size:20px;width:90px"></span></div></div>
+  </div>
+</section>
+
+<!-- ============ TAB: STEAM & CHECKS ============ -->
+<section class="tabpane" id="pane-steam">
+  <div class="card">
+    <h2>Steam / Measurement Tracking <span class="hint">target vs actual</span></h2>
+    <div class="scroll-x">
+      <table>
+        <thead><tr><th>Item</th><th>ช่วงเวลา</th><th class="num">Target</th><th class="num">Actual</th><th></th></tr></thead>
+        <tbody id="steamTableBody"></tbody>
+      </table>
+    </div>
+    <button class="addrow" id="addSteamRow">+ เพิ่มรายการวัด</button>
+  </div>
+
+  <div class="card section-gap">
+    <h2>NaOH Washing / Batch Checklist <span class="hint">กรอกเวลาและแตะเพื่อเลือก</span></h2>
+    <div id="naohChecklist"></div>
+  </div>
+</section>
+
+<!-- ============ TAB: HISTORY ============ -->
+<section class="tabpane" id="pane-history">
+  <div class="searchbar">
+    <input id="histSearch" type="search" placeholder="ค้นหาย้อนหลัง เช่น PM-901, สายพาน, overload…">
+  </div>
+  <div class="filter-chips" id="histChips"></div>
+  <div id="histResults"></div>
+</section>
+
+</main>
+
+<footer>
+  <span class="note">Digital Shift Log Book · ข้อมูลเก็บในเบราว์เซอร์นี้ (IndexedDB) — ใช้ปุ่ม ⚙️ เพื่อสำรอง/ย้ายข้อมูล</span>
+</footer>
+
+<div class="toast" id="toast">บันทึกแล้ว</div>
+<div id="settingsModalRoot"></div>
+<div id="photoViewerRoot"></div>
+<input type="file" id="importFileInput" accept="application/json" style="display:none">
+
+<script>
+(function(){
+'use strict';
+
+/* ================= CONFIG ================= */
+const CONFIG = {
+  dbName: 'ShiftLogBook_IDB', dbVersion: 1, store: 'days',
+  equipmentTags: ["PP-101A","PP-101B","PP-102A","PP-102B","PP-102C","PP-103A","PP-103B","PP-201A","PP-201B","PP-304A","PP-304B",
+    "PP-402A","PP-402B","PP-404A","PP-404B","PP-405A","PP-405B","PP-406A","PP-406B","PP-410","PP-450","PP-501A","PP-501B","PP-502A",
+    "PP-502B","PP-503A","PP-503B","PP-504A","PP-504B","PP-600","PP-601A","PP-601B","PP-601C","PP-603","TP-800A","TP-800B","TP-802A",
+    "TP-802B","PP-100","PP-901","PP-801","PP-802","PP-803","PP-804","PP-805","PJ-101","PJ-301","PJ-302","PJ-303","PJ-304","PJ-401",
+    "PJ-402","PJ-404","PC-201A","PC-201B","PC-401","PC-403A","PC-403B","PC-601","PC-602","PC-901","PM-101-1","PM-101-2","PM-102",
+    "PM-105","PM-401A","PM-401B","PM-401D","PM-402A","PM-402B","PM-404-1","PM-404-2","PM-404-3","PM-404-4","PM-802A","PM-802B",
+    "PM-802C","PM-804A","PM-804B","PM-804C","PM-901","PM-902","PZ-100","TZ-400","PZ-403","PZ-800A","PZ-800B","PZ-800C","PM-500A",
+    "PM-500B","PM-803A","PM-803B","PM-803C","PM-104","PTK-800A","PTK-800B","PTK-800C","PW-901","TTK-400","TTK-400","PE-101A",
+    "PE-101B","PE-101C","PE-101D","PE-101E","PE-101F","PT-501","PD-501","PD-403","PC-2201","KCV-2907","LCV-2301-3","PI-2412",
+    "LI-2901","FC-2601","FC-2602","FC-2603","PI-2601","TI-2610B","AI-2400","TI-2601","PS-2611","PS-2611B","PS-2611C","FC-2302"],
+  kpiItems: [
+    {key:'cba4', label:'4-CBA', target:'0-15'},
+    {key:'pta', label:'p-TA', target:'100-175'},
+    {key:'t340', label:'T-340', target:'87+'},
+    {key:'mps', label:'MPS', target:'99-137'},
+    {key:'bvalue', label:'B-value', target:'0.3-1.0'},
+    {key:'ht340', label:'%HT-340', target:'>68.5'},
+    {key:'load', label:'%Load', target:''},
+  ],
+  alarmTags: ['PS-2611','PS-2611B','PS-2611C','AI-2400','TI-2601'],
+  siloIds: ['A','B','C'],
+  tankKeys: ['810A','810B','810C','820A','820B'],
+  workTypes: ['Mechanical','Electrical','Instrument','Process'],
+  workStatuses: ['รอติดตาม','เฝ้าระวัง','ปิดงานแล้ว'],
+  sopReminders: [
+    {id:'sop1', txt:'Drain light oil PZ-601', freq:'ทุกวันเสาร์'},
+    {id:'sop2', txt:'Blow down PT-501', freq:'ทุกวันที่ 5,10,15,20,25,30'},
+    {id:'sop3', txt:'NaOH washing PT-501 + purge level PD-501', freq:'ทุกวันที่ 5,20'},
+    {id:'sop4', txt:'Depressurize & drain BTM ของ PM-401', freq:'ทุกวันที่ 15,30'},
+    {id:'sop5', txt:'Test run 2PP-102 · Start lube oil PP-102', freq:'พุธ/อาทิตย์'},
+    {id:'sop6', txt:'Switching PP-101', freq:'ทุกวันที่ 16'},
+    {id:'sop7', txt:'Commissioning PI-2412', freq:'ทุกวันที่ 5,10,15,20,25,30'},
+    {id:'sop8', txt:'Check LCV-2301-3', freq:'ทุกวันที่ 1,16'},
+  ],
+  naohUnitsPM401: ['A','B','D'],
+  naohUnitsPP404: ['A','B'],
+  naohBatchNumbers: [1,2,3,4,5,6],
+};
+
+/* ================= IndexedDB wrapper ================= */
+const dbManager = {
+  db: null,
+  init(){ return new Promise((resolve,reject)=>{
+    const req = indexedDB.open(CONFIG.dbName, CONFIG.dbVersion);
+    req.onupgradeneeded = (e)=>{ const db=e.target.result; if(!db.objectStoreNames.contains(CONFIG.store)) db.createObjectStore(CONFIG.store); };
+    req.onsuccess = (e)=>{ this.db=e.target.result; resolve(this.db); };
+    req.onerror = (e)=>reject(e.target.error);
+  }); },
+  get(key){ return new Promise((resolve,reject)=>{ const tx=this.db.transaction(CONFIG.store,'readonly'); const r=tx.objectStore(CONFIG.store).get(key); r.onsuccess=()=>resolve(r.result); r.onerror=()=>reject(r.error); }); },
+  set(key,val){ return new Promise((resolve,reject)=>{ const tx=this.db.transaction(CONFIG.store,'readwrite'); const r=tx.objectStore(CONFIG.store).put(val,key); r.onsuccess=()=>resolve(); r.onerror=()=>reject(r.error); }); },
+  allKeys(){ return new Promise((resolve,reject)=>{ const tx=this.db.transaction(CONFIG.store,'readonly'); const r=tx.objectStore(CONFIG.store).getAllKeys(); r.onsuccess=()=>resolve(r.result); r.onerror=()=>reject(r.error); }); },
+  allEntries(){ return new Promise((resolve,reject)=>{ const tx=this.db.transaction(CONFIG.store,'readonly'); const store=tx.objectStore(CONFIG.store); const keysReq=store.getAllKeys(); const valsReq=store.getAll();
+    let keys,vals; const done=()=>{ if(keys&&vals) resolve(keys.map((k,i)=>[k,vals[i]])); };
+    keysReq.onsuccess=()=>{keys=keysReq.result; done();}; valsReq.onsuccess=()=>{vals=valsReq.result; done();};
+    keysReq.onerror=()=>reject(keysReq.error); valsReq.onerror=()=>reject(valsReq.error);
+  }); },
+  delete(key){ return new Promise((resolve,reject)=>{ const tx=this.db.transaction(CONFIG.store,'readwrite'); const r=tx.objectStore(CONFIG.store).delete(key); r.onsuccess=()=>resolve(); r.onerror=()=>reject(r.error); }); },
+};
+
+/* ================= Data model helpers ================= */
+function emptyDay(dateStr){
+  return {
+    date: dateStr,
+    crew: { day:{fm:'',bm:''}, night:{fm:'',bm:''} },
+    kpi: { cba4:{day:'',night:''}, pta:{day:'',night:''}, t340:{day:'',night:''}, mps:{day:'',night:''}, bvalue:{day:'',night:''}, ht340:{day:'',night:''}, load:{day:'',night:''} },
+    ttk400: {day:'',night:''}, tk401:{day:'',night:''}, totalProduct:'',
+    dailyWork: [], qualityLog: [],
+    qualityPanel: { cta4cba:'', ctaT340:'', recovM:'', recovN:'' },
+    safety: { 1:'ok', 2:'ok', 3:'ok', 4:'ok', 5:'ok' },
+    alarms: {}, silo: [], planLoading: {}, sap: [],
+    workPermit: { closeTime:'' },
+    steam: [],
+    naoh: {
+      batch: { time:'', total:'', batchNo:'' },
+      mlPd403: { time:'', units: [] },
+      pj404: { time:'', done:'' },
+      pp404pw901: { time:'', units: [] },
+      li2901: { time:'', done:'' },
+      pm901wash: { time:'' },
+      startPm901: { time:'' },
+      requestCta: { done:'' },
+    },
+    sopDone: {},
+  };
+}
+function todayStr(d){ d=d||new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function pad(n){ return (n<10?'0':'')+n; }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function parseTargetRange(str){
+  if(!str) return null;
+  str=str.trim();
+  let m=str.match(/^([\d.]+)\s*-\s*([\d.]+)$/); if(m) return {min:parseFloat(m[1]),max:parseFloat(m[2])};
+  m=str.match(/^([\d.]+)\+$/); if(m) return {min:parseFloat(m[1]),max:Infinity};
+  m=str.match(/^[>≥]\s*([\d.]+)$/); if(m) return {min:parseFloat(m[1]),max:Infinity};
+  return null;
+}
+function kpiStatus(value, targetStr){
+  if(value===''||value==null||isNaN(parseFloat(value))) return null;
+  const range=parseTargetRange(targetStr);
+  if(!range) return 'ok';
+  const v=parseFloat(value);
+  return (v>=range.min && v<=range.max) ? 'ok' : 'warn';
+}
+
+/* ================= Auto-parse (EQ tag / time / type) ================= */
+const TAGSET = new Set(CONFIG.equipmentTags.map(t=>t.toUpperCase()));
+const EQ_SCAN_RE = /\b(?:2?(?:PP|PM|PC|PJ|PZ|PT|PD|PE|PG|PW|PX|PS|PI|PTK|TTK|TK|TP|TZ|KCV|LCV|FC|FI|LI|TI|AI))-?\d{2,4}[A-Z]?(?:-\d)?\b/gi;
+const TIME_RE=/\b([01]?\d|2[0-3]):([0-5]\d)\b/;
+const TYPE_RULES=[
+  [/สายพาน|belt|bearing|ลูกปืน|seal|ซีล|รั่ว|leak|สั่น|vibrat|เสียงดัง|noise|ขัน|tighten/i,'Mechanical'],
+  [/trip|overload|current|มอเตอร์|motor|ไฟ|breaker/i,'Electrical'],
+  [/alarm|transmitter|dcs|valve|control|sensor|setting|calibrat/i,'Instrument'],
+  [/load|flow|pressure|temp|level|flush|drain|wash|start|stop|switch|สลับ|เดินเครื่อง/i,'Process'],
+];
+function autoParse(txt){
+  const out={time:null,tags:[],type:null,important:false};
+  const tm=txt.match(TIME_RE); out.time=tm?tm[0]:null;
+  const seen={}; let m; EQ_SCAN_RE.lastIndex=0;
+  while((m=EQ_SCAN_RE.exec(txt))!==null){ const t=m[0].toUpperCase(); if(!seen[t]){seen[t]=1; out.tags.push({tag:t,known:TAGSET.has(t)});} }
+  for(let i=0;i<TYPE_RULES.length;i++){ if(TYPE_RULES[i][0].test(txt)){ out.type=TYPE_RULES[i][1]; break; } }
+  out.important = /\*\*\*|ด่วน|สำคัญ|urgent/i.test(txt);
+  return out;
+}
+
+/* ================= State ================= */
+let currentDate = localStorage.getItem('logbook_lastDate') || todayStr();
+let currentDay = null;
+let saveTimer = null;
+
+async function loadDay(dateStr){
+  let day = await dbManager.get(dateStr);
+  if(!day){ day = emptyDay(dateStr); await dbManager.set(dateStr, day); }
+  // backfill any missing keys for forward-compat
+  const blank = emptyDay(dateStr);
+  day = Object.assign({}, blank, day);
+  day.crew = Object.assign({}, blank.crew, day.crew);
+  day.kpi = Object.assign({}, blank.kpi, day.kpi);
+  day.qualityPanel = Object.assign({}, blank.qualityPanel, day.qualityPanel);
+  day.safety = Object.assign({}, blank.safety, day.safety);
+  day.workPermit = Object.assign({}, blank.workPermit, day.workPermit);
+  const naohShape = (day.naoh && typeof day.naoh.batch === 'object') ? day.naoh : {};
+  day.naoh = {
+    batch: Object.assign({}, blank.naoh.batch, naohShape.batch),
+    mlPd403: Object.assign({}, blank.naoh.mlPd403, naohShape.mlPd403),
+    pj404: Object.assign({}, blank.naoh.pj404, naohShape.pj404),
+    pp404pw901: Object.assign({}, blank.naoh.pp404pw901, naohShape.pp404pw901),
+    li2901: Object.assign({}, blank.naoh.li2901, naohShape.li2901),
+    pm901wash: Object.assign({}, blank.naoh.pm901wash, naohShape.pm901wash),
+    startPm901: Object.assign({}, blank.naoh.startPm901, naohShape.startPm901),
+    requestCta: Object.assign({}, blank.naoh.requestCta, naohShape.requestCta),
+  };
+  return day;
+}
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{ dbManager.set(currentDate, currentDay); }, 300);
+}
+async function saveNow(){ clearTimeout(saveTimer); await dbManager.set(currentDate, currentDay); }
+
+/* ================= Seed sample data (first run only) ================= */
+async function seedSampleIfEmpty(){
+  const keys = await dbManager.allKeys();
+  if(keys.length>0) return;
+  const d = emptyDay('2026-07-07');
+  d.crew = { day:{fm:'ชาญชัช',bm:'ศุภสิทธิ์'}, night:{fm:'เฉลิมพล',bm:'ฐาณันตร์'} };
+  d.kpi = { cba4:{day:'15.06',night:'15.11'}, pta:{day:'165.00',night:'159.00'}, t340:{day:'89.90',night:'89.20'},
+    mps:{day:'120.00',night:'122.00'}, bvalue:{day:'0.75',night:'0.75'}, ht340:{day:'72.80',night:''}, load:{day:'98.00',night:'98.00'} };
+  d.ttk400 = {day:'105',night:'118'}; d.tk401 = {day:'7',night:'9'}; d.totalProduct='1316.00';
+  d.qualityPanel = { cta4cba:'3910', ctaT340:'15.0', recovM:'3', recovN:'8' };
+  d.alarms = {'PS-2611':0,'PS-2611B':0,'PS-2611C':0,'AI-2400':0,'TI-2601':0};
+  d.silo = [
+    {id:uid(),time:'07:50',from:'',to:'',dest:'A → 820A',note:'810A full'},
+    {id:uid(),time:'12:00',from:'B',to:'A',dest:'B → PTK810A',note:''},
+    {id:uid(),time:'18:00',from:'A',to:'B',dest:'A → PTK810A',note:''},
+    {id:uid(),time:'00:00',from:'B',to:'A',dest:'B → PTK810A',note:'🌙'},
+    {id:uid(),time:'06:00',from:'A',to:'B',dest:'A → PTK810A',note:'🌙'},
+  ];
+  d.planLoading = {'810A':'1317','810B':'0','810C':'0','820A':'820.8','820B':'0'};
+  d.sap = [
+    {id:uid(),sapNo:'100523114',detail:'เปลี่ยนสายพาน PM-901 (3 เส้น) หลัง overload trip',status:'Completed',remark:'ME ปิดงาน 10:15'},
+    {id:uid(),sapNo:'100523118',detail:'ขัน G/P PJ-404 จุดรั่วซึม',status:'Not yet',remark:'ฝากกะเช้าติดตาม'},
+  ];
+  d.workPermit = { closeTime:'19:00' };
+  d.steam = [
+    {id:uid(),item:'FC-2302.SV',range:'07:30-19:30',target:'9.2',actual:'9.2'},
+    {id:uid(),item:'FC-2302.SV',range:'19:30-07:30',target:'9.2',actual:'9.2'},
+    {id:uid(),item:'FC-2602.MV',range:'07:30-19:30',target:'32',actual:'32'},
+    {id:uid(),item:'FC-2602.MV',range:'19:30-07:30',target:'34',actual:'34'},
+  ];
+  d.naoh = {
+    batch: { time:'15:10', total:'30', batchNo:'1' },
+    mlPd403: { time:'15:20', units:['A','D'] },
+    pj404: { time:'15:40', done:'yes' },
+    pp404pw901: { time:'16:00', units:['A'] },
+    li2901: { time:'16:20', done:'yes' },
+    pm901wash: { time:'16:30' },
+    startPm901: { time:'17:00' },
+    requestCta: { done:'no' },
+  };
+  d.dailyWork = [
+    {id:uid(),time:'08:50',shift:'day',text:'ME เข้าตรวจสอบ PM-901 หลังพบ current สูงและ overload trip ทำให้สายพานเสียหาย\n- เปลี่ยนสายพานครบทั้ง 3 เส้น',tags:['PM-901'],type:'Mechanical',status:'รอติดตาม',important:true,photos:[],author:'ชาญชัช (F/M)'},
+    {id:uid(),time:'10:15',shift:'day',text:'Start loop PM-901 กลับมาเดินปกติ\n*** IE ติดตั้งนั่งร้านเตรียมพร้อมกรณี KCV-2907 เปิด–ปิดไม่ทำงาน',tags:['PM-901','KCV-2907'],type:'Mechanical',status:'ปิดงานแล้ว',important:false,photos:[],author:'ชาญชัช (F/M)'},
+    {id:uid(),time:'10:15',shift:'day',text:'สลับปั๊มจาก PP-601C → PP-601B หลัง vent สำเร็จ\n- Start PP-601B ปรับ discharge valve 0 → 3 → 5 → 10 → 13 → 10%\n- ค่อยๆ ปิด valve PP-601C จาก 20 → 0% แล้ว stop\n*** Tune hot oil loop จนพารามิเตอร์กลับสู่ปกติ',tags:['PP-601B','PP-601C'],type:'Process',status:'ปิดงานแล้ว',important:false,photos:[],author:'ศุภสิทธิ์ (B/M)'},
+    {id:uid(),time:'17:05',shift:'day',text:'F/O ตรวจอุณหภูมิ PP-601B: TG 95°C · TI-2610B 118.4°C\n- Drain น้ำมันจาก oil cooler tubes พบน้ำมันครบ 3 tubes',tags:['PP-601B'],type:'Mechanical',status:'เฝ้าระวัง',important:false,photos:[],author:'ชาญชัช (F/M)'},
+    {id:uid(),time:'21:30',shift:'night',text:'Eng PE ขอปรับ setting alarm current PM-901: PH 95 → 30 · HH 99.9 → 35 เพื่อ monitor ความผิดปกติของ current',tags:['PM-901'],type:'Instrument',status:'เฝ้าระวัง',important:true,photos:[],author:'ฐาณันตร์ (B/M)'},
+    {id:uid(),time:'06:14',shift:'night',text:'Flush level PW-901 1 ครั้ง เนื่องจาก level error\n* พบ RPF และ PJ-404 G/P รั่วซึม — ฝากกะเช้าแจ้ง ME เข้าขัน',tags:['PW-901','PJ-404'],type:'Mechanical',status:'รอติดตาม',important:false,photos:[],author:'เฉลิมพล (F/M)'},
+  ];
+  d.qualityLog = [
+    {id:uid(),time:'07:40',text:'Dec PC-2201 จาก 77.7 → 77.6 → 77.5 → 77.3 (11:13) · 4-CBA = 13.4 ppm',tags:['PC-2201']},
+    {id:uid(),time:'15:10',text:'Load up 97 → 98% · TTK-400 = 119 ton → 97% (18:25)',tags:['TTK-400']},
+    {id:uid(),time:'19:35',text:'🌙 Load down plant 97 → 96 → (02:00) 98% เพื่อ balance weight TTK-400',tags:['TTK-400']},
+  ];
+  await dbManager.set('2026-07-07', d);
+}
+
+/* ================= Tabs ================= */
+document.querySelectorAll('.tabs [role=tab]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tabs [role=tab]').forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    document.querySelectorAll('.tabpane').forEach(p=>p.classList.remove('active'));
+    document.getElementById('pane-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='history') renderHistory();
+    window.scrollTo({top:0});
+  });
+});
+
+/* ================= Date nav ================= */
+const dateInput = document.getElementById('dateInput');
+function shiftDate(base, days){ const d=new Date(base+'T00:00:00'); d.setDate(d.getDate()+days); return todayStr(d); }
+async function goToDate(dateStr){
+  currentDate = dateStr;
+  localStorage.setItem('logbook_lastDate', dateStr);
+  dateInput.value = dateStr;
+  currentDay = await loadDay(dateStr);
+  renderAll();
+}
+dateInput.addEventListener('change', ()=>goToDate(dateInput.value));
+document.getElementById('prevDayBtn').addEventListener('click', ()=>goToDate(shiftDate(currentDate,-1)));
+document.getElementById('nextDayBtn').addEventListener('click', ()=>goToDate(shiftDate(currentDate,1)));
+document.getElementById('todayBtn').addEventListener('click', ()=>goToDate(todayStr()));
+
+document.getElementById('segDay').addEventListener('click', ()=>{
+  document.getElementById('segDay').setAttribute('aria-pressed','true');
+  document.getElementById('segNight').setAttribute('aria-pressed','false');
+  document.getElementById('dayHead').scrollIntoView({behavior:'smooth'});
+});
+document.getElementById('segNight').addEventListener('click', ()=>{
+  document.getElementById('segNight').setAttribute('aria-pressed','true');
+  document.getElementById('segDay').setAttribute('aria-pressed','false');
+  document.getElementById('nightHead').scrollIntoView({behavior:'smooth'});
+});
+
+/* ================= Render: Overview ================= */
+function renderOverview(){
+  document.getElementById('ov-totalProduct').value = currentDay.totalProduct;
+  document.getElementById('ov-ttkDay').value = currentDay.ttk400.day;
+  document.getElementById('ov-ttkNight').value = currentDay.ttk400.night;
+  document.getElementById('ov-tk401Day').value = currentDay.tk401.day;
+  document.getElementById('ov-tk401Night').value = currentDay.tk401.night;
+  document.getElementById('crew-day-fm').value = currentDay.crew.day.fm;
+  document.getElementById('crew-day-bm').value = currentDay.crew.day.bm;
+  document.getElementById('crew-night-fm').value = currentDay.crew.night.fm;
+  document.getElementById('crew-night-bm').value = currentDay.crew.night.bm;
+  document.getElementById('dayCrewline').textContent = `F/M ${currentDay.crew.day.fm||'—'} · B/M ${currentDay.crew.day.bm||'—'}`;
+  document.getElementById('nightCrewline').textContent = `F/M ${currentDay.crew.night.fm||'—'} · B/M ${currentDay.crew.night.bm||'—'}`;
+
+  updateOverviewAlarmSummary();
+
+  // safety summary (read-only mirror)
+  const safetyLabels = {1:'Environmental Chemical Spill',2:'Safety Operation Condition',3:'Warehouse Condition',4:'Equipment Safety Guard',5:'Other'};
+  let safetyHtml='';
+  for(const k in safetyLabels){
+    const st = currentDay.safety[k]||'ok';
+    safetyHtml += `<div class="checkrow"><span class="led ${st==='ok'?'ok':'bad'}"></span><span class="name">${safetyLabels[k]}</span><span class="chip ${st==='ok'?'ok':'bad'}">${st==='ok'?'Normal':'Abnormal'}</span></div>`;
+  }
+  document.getElementById('ov-safetySummary').innerHTML = safetyHtml;
+
+  renderKpiTable();
+
+  // important entries roll-up
+  const important = currentDay.dailyWork.filter(e=>e.important).sort((a,b)=>a.time.localeCompare(b.time));
+  document.getElementById('ov-important').innerHTML = important.length
+    ? important.map(e=>`<div class="hist-item red-item"><span class="ht">${esc(e.time)}</span><span class="htxt">${esc(e.text.split('\n')[0])}</span></div>`).join('')
+    : '<p class="empty-hint">ยังไม่มีรายการที่ทำเครื่องหมายสำคัญวันนี้</p>';
+}
+
+function kpiStatusChipHtml(dSt,nSt){
+  const worst = (dSt==='warn'||nSt==='warn') ? 'warn' : (dSt||nSt||'ok');
+  return worst==='warn' ? '<span class="chip warn"><span class="led warn"></span>เกิน target</span>' : '<span class="chip ok"><span class="led ok"></span>ปกติ</span>';
+}
+function renderKpiTable(){
+  document.getElementById('kpiTableBody').innerHTML = CONFIG.kpiItems.map(item=>{
+    const dv = currentDay.kpi[item.key].day, nv = currentDay.kpi[item.key].night;
+    const dSt = kpiStatus(dv,item.target), nSt = kpiStatus(nv,item.target);
+    return `<tr data-kpi="${item.key}">
+      <td>${item.label}</td>
+      <td class="mono" style="color:var(--muted)">${item.target||'—'}</td>
+      <td class="num"><input class="cell-input num kpi-input ${dSt==='warn'?'kpi-flag':''}" data-key="${item.key}" data-shift="day" value="${esc(dv)}" placeholder="—"></td>
+      <td class="num"><input class="cell-input num kpi-input ${nSt==='warn'?'kpi-flag':''}" data-key="${item.key}" data-shift="night" value="${esc(nv)}" placeholder="—"></td>
+      <td class="kpi-status-cell">${kpiStatusChipHtml(dSt,nSt)}</td>
+    </tr>`;
+  }).join('');
+  document.querySelectorAll('.kpi-input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      currentDay.kpi[inp.dataset.key][inp.dataset.shift] = inp.value;
+      scheduleSave();
+      updateKpiRow(inp.dataset.key);
+    });
+  });
+}
+function updateKpiRow(key){
+  const item = CONFIG.kpiItems.find(i=>i.key===key);
+  const row = document.querySelector(`#kpiTableBody tr[data-kpi="${key}"]`);
+  if(!item || !row) return;
+  const dv = currentDay.kpi[key].day, nv = currentDay.kpi[key].night;
+  const dSt = kpiStatus(dv,item.target), nSt = kpiStatus(nv,item.target);
+  const dayInput = row.querySelector('input[data-shift="day"]');
+  const nightInput = row.querySelector('input[data-shift="night"]');
+  if(dayInput) dayInput.classList.toggle('kpi-flag', dSt==='warn');
+  if(nightInput) nightInput.classList.toggle('kpi-flag', nSt==='warn');
+  const statusCell = row.querySelector('.kpi-status-cell');
+  if(statusCell) statusCell.innerHTML = kpiStatusChipHtml(dSt,nSt);
+}
+
+function alarmClass(v){ return v===0?'ok':(v<3?'warn':'bad'); }
+function updateOverviewAlarmSummary(){
+  let total=0; const ledsHtml=[];
+  CONFIG.alarmTags.forEach(tag=>{
+    const v = parseInt(currentDay.alarms[tag]||0,10)||0;
+    total+=v;
+    ledsHtml.push(`<span><span class="led ${alarmClass(v)}"></span>${tag}</span>`);
+  });
+  const totalEl = document.getElementById('ov-alarmTotal');
+  const ledsEl = document.getElementById('ov-alarmLeds');
+  if(totalEl) totalEl.innerHTML = total+' <small>รายการ</small>';
+  if(ledsEl) ledsEl.innerHTML = ledsHtml.join('');
+}
+
+['ov-totalProduct','ov-ttkDay','ov-ttkNight','ov-tk401Day','ov-tk401Night'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', e=>{
+    if(id==='ov-totalProduct') currentDay.totalProduct = e.target.value;
+    if(id==='ov-ttkDay') currentDay.ttk400.day = e.target.value;
+    if(id==='ov-ttkNight') currentDay.ttk400.night = e.target.value;
+    if(id==='ov-tk401Day') currentDay.tk401.day = e.target.value;
+    if(id==='ov-tk401Night') currentDay.tk401.night = e.target.value;
+    scheduleSave();
+  });
+});
+['crew-day-fm','crew-day-bm','crew-night-fm','crew-night-bm'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', e=>{
+    const [,, shift, role] = id.split('-');
+    currentDay.crew[shift][role] = e.target.value;
+    document.getElementById('dayCrewline').textContent = `F/M ${currentDay.crew.day.fm||'—'} · B/M ${currentDay.crew.day.bm||'—'}`;
+    document.getElementById('nightCrewline').textContent = `F/M ${currentDay.crew.night.fm||'—'} · B/M ${currentDay.crew.night.bm||'—'}`;
+    scheduleSave();
+  });
+});
+
+/* ================= Generic composer wiring ================= */
+function wireComposer(root, onSave){
+  const textarea = root.querySelector('.composerText');
+  const liveParse = root.querySelector('.live-parse');
+  const saveBtn = root.querySelector('.saveBtn');
+  const impBtn = root.querySelector('.impBtn');
+  const photoStrip = root.querySelector('.photo-strip');
+  const pasteHint = root.querySelector('.paste-hint');
+  const attachBtn = root.querySelector('.attachBtn');
+  const attachPop = root.querySelector('.attach-pop');
+  const fileInput = root.querySelector('.fileInput');
+  const typeSelect = root.querySelector('.typeSelect');
+  const statusSelect = root.querySelector('.statusSelect');
+  let photos = [];
+  let parsed = {time:null,tags:[],type:null,important:false};
+  let parseTimer=null;
+  let typeManuallySet = false;
+
+  if(typeSelect){
+    CONFIG.workTypes.forEach(t=>{ const o=document.createElement('option'); o.value=t; o.textContent=t; typeSelect.appendChild(o); });
+    typeSelect.addEventListener('change', ()=>{ typeManuallySet = true; });
+  }
+  if(statusSelect){
+    CONFIG.workStatuses.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; statusSelect.appendChild(o); });
+  }
+
+  function renderLiveParse(){
+    const txt = textarea.value;
+    if(!txt.trim()){ liveParse.innerHTML='<span class="plabel">🤖 ตรวจพบอัตโนมัติ:</span><span class="note">— เริ่มพิมพ์เพื่อดูการแยกข้อมูล —</span>'; saveBtn.disabled = photos.length===0; return; }
+    parsed = autoParse(txt);
+    if(impBtn && impBtn.getAttribute('aria-pressed')==='true') parsed.important = true;
+    if(typeSelect && !typeManuallySet) typeSelect.value = parsed.type || '';
+    let h = '<span class="plabel">🤖 ตรวจพบอัตโนมัติ:</span>';
+    h += parsed.time ? `<span class="chip"><span class="mono">🕐 ${parsed.time}</span></span>` : '<span class="chip">🕐 ใช้เวลาปัจจุบัน</span>';
+    parsed.tags.forEach(t=>{ h += `<span class="chip tagchip" title="${t.known?'พบในรายการอุปกรณ์':'ไม่พบในรายการ EQ ที่รู้จัก — ตรวจสอบรหัส'}">${t.known?'':'❓'}${esc(t.tag)}</span>`; });
+    if(parsed.important) h += '<span class="chip bad">⭐ ตัวแดง</span>';
+    liveParse.innerHTML = h;
+    saveBtn.disabled = false;
+  }
+  textarea.addEventListener('input', ()=>{ clearTimeout(parseTimer); parseTimer=setTimeout(renderLiveParse,200); });
+
+  if(impBtn){
+    impBtn.addEventListener('click', ()=>{
+      impBtn.setAttribute('aria-pressed', impBtn.getAttribute('aria-pressed')==='true'?'false':'true');
+      renderLiveParse();
+    });
+  }
+  if(attachBtn && attachPop){
+    attachBtn.addEventListener('click', (e)=>{ e.stopPropagation(); attachPop.classList.toggle('open'); });
+    document.addEventListener('click', ()=>attachPop.classList.remove('open'));
+    attachPop.querySelectorAll('button').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const act=b.dataset.act;
+        if(act==='camera'){ fileInput.setAttribute('capture','environment'); fileInput.click(); }
+        else if(act==='gallery'){ fileInput.removeAttribute('capture'); fileInput.click(); }
+        else if(act==='paste'){ pasteHint.classList.add('show'); }
+        attachPop.classList.remove('open');
+      });
+    });
+    fileInput.addEventListener('change', ()=>{
+      Array.from(fileInput.files).forEach(file=>{
+        const r=new FileReader(); r.onload=(ev)=>addPhoto(ev.target.result); r.readAsDataURL(file);
+      });
+      fileInput.value='';
+    });
+    textarea.addEventListener('paste', (e)=>{
+      if(!e.clipboardData) return;
+      for(const item of e.clipboardData.items){
+        if(item.type.indexOf('image')===0){
+          const blob=item.getAsFile(); const r=new FileReader();
+          r.onload=(ev)=>{ addPhoto(ev.target.result); toast('แนบรูปจากคลิปบอร์ดแล้ว 📎'); };
+          r.readAsDataURL(blob); e.preventDefault();
+        }
+      }
+    });
+  }
+  function addPhoto(dataUrl){
+    compressDataUrl(dataUrl, 900, 0.72).then(compressed=>{
+      photos.push(compressed); renderPhotoStrip();
+      saveBtn.disabled = !textarea.value.trim() && photos.length===0;
+    });
+  }
+  function renderPhotoStrip(){
+    photoStrip.innerHTML='';
+    photos.forEach((src,idx)=>{
+      const d=document.createElement('div'); d.className='thumb';
+      d.innerHTML=`<img src="${src}" alt="รูปแนบ"><button class="rm" title="ลบรูป">✕</button>`;
+      d.querySelector('.rm').addEventListener('click', (e)=>{ e.stopPropagation(); photos.splice(idx,1); renderPhotoStrip(); saveBtn.disabled = !textarea.value.trim() && photos.length===0; });
+      d.addEventListener('click', ()=> openPhotoViewer(photos, idx));
+      photoStrip.appendChild(d);
+    });
+  }
+
+  saveBtn.addEventListener('click', ()=>{
+    const txt = textarea.value.trim();
+    if(!txt && !photos.length) return;
+    if(!parsed.time && txt) parsed = autoParse(txt);
+    if(impBtn && impBtn.getAttribute('aria-pressed')==='true') parsed.important = true;
+    onSave({
+      time: parsed.time || (function(){const n=new Date();return pad(n.getHours())+':'+pad(n.getMinutes());})(),
+      text: txt, tags: parsed.tags.map(t=>t.tag),
+      type: typeSelect ? (typeSelect.value || parsed.type) : parsed.type,
+      status: statusSelect ? statusSelect.value : undefined,
+      important: !!parsed.important, photos: photos.slice(),
+    });
+    textarea.value=''; photos=[]; renderPhotoStrip();
+    if(impBtn) impBtn.setAttribute('aria-pressed','false');
+    if(pasteHint) pasteHint.classList.remove('show');
+    typeManuallySet = false;
+    if(typeSelect) typeSelect.value = '';
+    if(statusSelect) statusSelect.value = CONFIG.workStatuses[0];
+    renderLiveParse();
+  });
+  if(statusSelect) statusSelect.value = CONFIG.workStatuses[0];
+  renderLiveParse();
+}
+function compressDataUrl(dataUrl, maxWidth, quality){
+  return new Promise((resolve)=>{
+    const img=new Image();
+    img.onload=()=>{
+      if(img.width<=maxWidth){ resolve(dataUrl); return; }
+      const canvas=document.createElement('canvas');
+      const scale=maxWidth/img.width;
+      canvas.width=maxWidth; canvas.height=img.height*scale;
+      const ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      resolve(canvas.toDataURL('image/jpeg',quality));
+    };
+    img.onerror=()=>resolve(dataUrl);
+    img.src=dataUrl;
+  });
+}
+
+/* ================= Render: Daily Work timeline ================= */
+function statusClass(status){ return status==='ปิดงานแล้ว'?'ok':(status==='เฝ้าระวัง'?'warn':'bad'); }
+function entryCardHtml(e, sectionKey){
+  const tagsHtml = (e.tags||[]).map(t=>`<span class="chip tagchip">${esc(t)}</span>`).join('');
+  const editable = sectionKey==='dailyWork';
+  const typeHtml = editable
+    ? `<select class="chip-select neutral entry-type-select" data-field="type">${buildSelectOptions(CONFIG.workTypes, e.type||'')}</select>`
+    : (e.type ? `<span class="chip typechip">${esc(e.type)}</span>` : '');
+  const statusHtml = editable
+    ? `<select class="chip-select ${statusClass(e.status)} entry-status-select" data-field="status">${buildSelectOptions(CONFIG.workStatuses, e.status||'')}</select>`
+    : (e.status ? `<span class="chip ${statusClass(e.status)}">${esc(e.status)}</span>` : '');
+  const photosHtml = (e.photos&&e.photos.length) ? `<div class="photos">${e.photos.map(p=>`<div class="thumb"><img src="${p}" alt="รูปแนบ"></div>`).join('')}</div>` : '';
+  return `<div class="entry ${e.important?'red':''}" data-id="${e.id}" data-section="${sectionKey}">
+    <div class="t-rail"><span class="t-time">${esc(e.time)}</span><span class="t-line"></span></div>
+    <div class="entry-card">
+      <div class="cardbtns">
+        <button class="star" title="ทำตัวแดง (สำคัญ)">⭐</button>
+        <button class="del" title="ลบรายการ">🗑️</button>
+      </div>
+      <div class="body">${esc(e.text)}</div>
+      <div class="meta">${tagsHtml}${typeHtml}${statusHtml}</div>
+      ${photosHtml}
+      ${e.author?`<div class="byline">บันทึกโดย ${esc(e.author)}</div>`:''}
+    </div>
+  </div>`;
+}
+function renderDailyWork(){
+  const day = currentDay.dailyWork.filter(e=>e.shift==='day').sort((a,b)=>a.time.localeCompare(b.time));
+  const night = currentDay.dailyWork.filter(e=>e.shift==='night').sort((a,b)=>a.time.localeCompare(b.time));
+  document.getElementById('dayTimeline').innerHTML = day.length ? day.map(e=>entryCardHtml(e,'dailyWork')).join('') : '<p class="empty-hint">ยังไม่มีบันทึกกะเช้า — พิมพ์ในช่องด้านบนเพื่อเริ่มบันทึก</p>';
+  document.getElementById('nightTimeline').innerHTML = night.length ? night.map(e=>entryCardHtml(e,'dailyWork')).join('') : '<p class="empty-hint">ยังไม่มีบันทึกกะดึก</p>';
+  wireEntryButtons();
+}
+function renderQualityLog(){
+  const list = currentDay.qualityLog.slice().sort((a,b)=>a.time.localeCompare(b.time));
+  document.getElementById('qualityTimeline').innerHTML = list.length ? list.map(e=>entryCardHtml(e,'qualityLog')).join('') : '<p class="empty-hint">ยังไม่มีบันทึก Quality Control วันนี้</p>';
+  wireEntryButtons();
+}
+function wireEntryButtons(){
+  document.querySelectorAll('.entry .star').forEach(btn=>{
+    btn.onclick = ()=>{
+      const entryEl = btn.closest('.entry');
+      const id = entryEl.dataset.id, section = entryEl.dataset.section;
+      const list = currentDay[section];
+      const item = list.find(x=>x.id===id);
+      if(item){ item.important = !item.important; scheduleSave(); if(section==='dailyWork') renderDailyWork(); else renderQualityLog(); renderOverview(); }
+    };
+  });
+  document.querySelectorAll('.entry .del').forEach(btn=>{
+    btn.onclick = ()=>{
+      if(!confirm('ต้องการลบรายการนี้ใช่หรือไม่?')) return;
+      const entryEl = btn.closest('.entry');
+      const id = entryEl.dataset.id, section = entryEl.dataset.section;
+      currentDay[section] = currentDay[section].filter(x=>x.id!==id);
+      scheduleSave();
+      if(section==='dailyWork') renderDailyWork(); else renderQualityLog();
+      renderOverview();
+    };
+  });
+  document.querySelectorAll('.entry-type-select').forEach(sel=>{
+    sel.addEventListener('change', ()=>{
+      const entryEl = sel.closest('.entry');
+      const id = entryEl.dataset.id, section = entryEl.dataset.section;
+      const item = currentDay[section].find(x=>x.id===id);
+      if(item){ item.type = sel.value || null; scheduleSave(); }
+    });
+  });
+  document.querySelectorAll('.entry-status-select').forEach(sel=>{
+    sel.addEventListener('change', ()=>{
+      const entryEl = sel.closest('.entry');
+      const id = entryEl.dataset.id, section = entryEl.dataset.section;
+      const item = currentDay[section].find(x=>x.id===id);
+      if(item){
+        item.status = sel.value;
+        scheduleSave();
+        sel.className = 'chip-select entry-status-select '+statusClass(item.status);
+      }
+    });
+  });
+  document.querySelectorAll('.entry .photos .thumb').forEach(thumb=>{
+    thumb.addEventListener('click', ()=>{
+      const entryEl = thumb.closest('.entry');
+      const id = entryEl.dataset.id, section = entryEl.dataset.section;
+      const item = currentDay[section].find(x=>x.id===id);
+      if(!item || !item.photos || !item.photos.length) return;
+      const idx = Array.from(thumb.parentElement.children).indexOf(thumb);
+      openPhotoViewer(item.photos, idx);
+    });
+  });
+}
+
+/* ================= Safety checklist ================= */
+const SAFETY_LABELS = {1:'Environmental Chemical Spill',2:'Safety Operation Condition',3:'Warehouse Condition',4:'Equipment Safety Guard Condition',5:'Other'};
+function renderSafetyChecklist(){
+  let html='';
+  for(const k in SAFETY_LABELS){
+    const st = currentDay.safety[k]||'ok';
+    html += `<div class="checkrow"><span class="name">${k}. ${SAFETY_LABELS[k]}</span>
+      <div class="miniseg" data-key="${k}">
+        <button class="ok-opt" aria-pressed="${st==='ok'}" data-val="ok">Normal</button>
+        <button class="bad-opt" aria-pressed="${st==='bad'}" data-val="bad">Abnormal</button>
+      </div></div>`;
+  }
+  document.getElementById('safetyChecklist').innerHTML = html;
+  document.querySelectorAll('#safetyChecklist .miniseg button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const key = btn.parentElement.dataset.key;
+      currentDay.safety[key] = btn.dataset.val;
+      scheduleSave(); renderSafetyChecklist(); renderOverview();
+    });
+  });
+}
+
+/* ================= Alarms ================= */
+function renderAlarms(){
+  document.getElementById('alarmTableBody').innerHTML = CONFIG.alarmTags.map(tag=>{
+    const v = currentDay.alarms[tag] ?? 0;
+    return `<tr data-tag="${tag}"><td class="mono">${tag}</td><td class="num"><input class="cell-input num alarm-input" data-tag="${tag}" value="${v}"></td><td><span class="led ${alarmClass(v)}"></span></td></tr>`;
+  }).join('');
+  document.querySelectorAll('.alarm-input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      currentDay.alarms[inp.dataset.tag] = parseInt(inp.value,10)||0;
+      scheduleSave();
+      updateAlarmRow(inp.dataset.tag);
+      updateOverviewAlarmSummary();
+    });
+  });
+}
+function updateAlarmRow(tag){
+  const row = document.querySelector(`#alarmTableBody tr[data-tag="${tag}"]`);
+  if(!row) return;
+  const v = currentDay.alarms[tag] ?? 0;
+  const led = row.querySelector('.led');
+  if(led) led.className = 'led '+alarmClass(v);
+}
+
+/* ================= Quality panel ================= */
+function renderQualityPanel(){
+  document.getElementById('q-cta4cba').value = currentDay.qualityPanel.cta4cba;
+  document.getElementById('q-ctaT340').value = currentDay.qualityPanel.ctaT340;
+  document.getElementById('q-recovM').value = currentDay.qualityPanel.recovM;
+  document.getElementById('q-recovN').value = currentDay.qualityPanel.recovN;
+}
+[['q-cta4cba','cta4cba'],['q-ctaT340','ctaT340'],['q-recovM','recovM'],['q-recovN','recovN']].forEach(([id,key])=>{
+  document.getElementById(id).addEventListener('input', e=>{ currentDay.qualityPanel[key]=e.target.value; scheduleSave(); });
+});
+
+/* ================= Silo table ================= */
+function buildSelectOptions(options, value){
+  let html = `<option value="" ${!value?'selected':''}>—</option>`;
+  let matched = !value;
+  options.forEach(opt=>{
+    const sel = opt===value;
+    if(sel) matched = true;
+    html += `<option value="${esc(opt)}" ${sel?'selected':''}>${esc(opt)}</option>`;
+  });
+  if(value && !matched){ html += `<option value="${esc(value)}" selected>${esc(value)} (เดิม)</option>`; }
+  return html;
+}
+function renderSilo(){
+  const rows = currentDay.silo;
+  document.getElementById('siloTableBody').innerHTML = rows.map(r=>`
+    <tr data-id="${r.id}">
+      <td><input class="cell-input silo-f" data-f="time" value="${esc(r.time)}" placeholder="00:00"></td>
+      <td style="display:flex;gap:4px;align-items:center">
+        <select class="cell-input silo-f" data-f="from" style="width:60px">${buildSelectOptions(CONFIG.siloIds, r.from)}</select>→
+        <select class="cell-input silo-f" data-f="to" style="width:60px">${buildSelectOptions(CONFIG.siloIds, r.to)}</select>
+      </td>
+      <td><select class="cell-input silo-f" data-f="dest">${buildSelectOptions(CONFIG.tankKeys, r.dest)}</select></td>
+      <td><input class="cell-input silo-f" data-f="note" value="${esc(r.note)}" placeholder="หมายเหตุ"></td>
+      <td><button class="rowdel silo-del">🗑️</button></td>
+    </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">ยังไม่มีรายการ</td></tr>';
+  document.querySelectorAll('.silo-f').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const id = inp.closest('tr').dataset.id;
+      const row = currentDay.silo.find(r=>r.id===id);
+      row[inp.dataset.f] = inp.value; scheduleSave();
+    });
+  });
+  document.querySelectorAll('.silo-del').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.closest('tr').dataset.id;
+      currentDay.silo = currentDay.silo.filter(r=>r.id!==id);
+      scheduleSave(); renderSilo();
+    });
+  });
+}
+document.getElementById('addSiloRow').addEventListener('click', ()=>{
+  currentDay.silo.push({id:uid(),time:'',from:'',to:'',dest:'',note:''});
+  scheduleSave(); renderSilo();
+});
+
+/* ================= Plan loading ================= */
+function renderPlanLoading(){
+  document.getElementById('planLoadingBody').innerHTML = CONFIG.tankKeys.map(k=>{
+    const v = currentDay.planLoading[k] ?? '';
+    return `<tr data-tank="${k}"><td class="mono">${k}</td><td class="num"><input class="cell-input num tank-input" data-tank="${k}" value="${esc(v)}" placeholder="0"></td><td><div class="bar"><i style="width:0%"></i></div></td></tr>`;
+  }).join('');
+  updatePlanLoadingBars();
+  document.querySelectorAll('.tank-input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      currentDay.planLoading[inp.dataset.tank] = inp.value;
+      scheduleSave();
+      updatePlanLoadingBars();
+    });
+  });
+}
+function updatePlanLoadingBars(){
+  const maxVal = Math.max(1, ...CONFIG.tankKeys.map(k=>parseFloat(currentDay.planLoading[k])||0));
+  CONFIG.tankKeys.forEach(k=>{
+    const v = parseFloat(currentDay.planLoading[k])||0;
+    const pct = Math.min(100, Math.round((v/maxVal)*100));
+    const row = document.querySelector(`#planLoadingBody tr[data-tank="${k}"]`);
+    if(row){ const bar = row.querySelector('.bar i'); if(bar) bar.style.width = pct+'%'; }
+  });
+}
+
+/* ================= SOP reminders ================= */
+function renderSop(){
+  document.getElementById('sopList').innerHTML = CONFIG.sopReminders.map(item=>{
+    const done = !!currentDay.sopDone[item.id];
+    return `<li class="${done?'done':''}"><input type="checkbox" data-id="${item.id}" ${done?'checked':''}><span class="txt">${esc(item.txt)}</span><span class="freq">${esc(item.freq)}</span></li>`;
+  }).join('');
+  document.querySelectorAll('#sopList input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change', ()=>{ currentDay.sopDone[cb.dataset.id]=cb.checked; scheduleSave(); renderSop(); });
+  });
+}
+
+/* ================= SAP table ================= */
+function renderSap(){
+  const rows = currentDay.sap;
+  document.getElementById('sapTableBody').innerHTML = rows.map(r=>`
+    <tr data-id="${r.id}">
+      <td><input class="cell-input sap-f mono" data-f="sapNo" value="${esc(r.sapNo)}" placeholder="SAP No."></td>
+      <td><input class="cell-input sap-f" data-f="detail" value="${esc(r.detail)}" placeholder="รายละเอียด"></td>
+      <td><select class="cell-input sap-f" data-f="status" style="padding-right:2px">
+        <option value="Not yet" ${r.status==='Not yet'?'selected':''}>Not yet</option>
+        <option value="REL" ${r.status==='REL'?'selected':''}>REL</option>
+        <option value="Completed" ${r.status==='Completed'?'selected':''}>Completed</option>
+      </select></td>
+      <td><input class="cell-input sap-f" data-f="remark" value="${esc(r.remark)}" placeholder="Remark"></td>
+      <td><button class="rowdel sap-del">🗑️</button></td>
+    </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">ยังไม่มีงาน SAP</td></tr>';
+  document.querySelectorAll('.sap-f').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const id = inp.closest('tr').dataset.id;
+      const row = currentDay.sap.find(r=>r.id===id);
+      row[inp.dataset.f] = inp.value; scheduleSave(); renderWorkPermitStats();
+    });
+  });
+  document.querySelectorAll('.sap-del').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.closest('tr').dataset.id;
+      currentDay.sap = currentDay.sap.filter(r=>r.id!==id);
+      scheduleSave(); renderSap(); renderWorkPermitStats();
+    });
+  });
+  renderWorkPermitStats();
+}
+function renderWorkPermitStats(){
+  const total = currentDay.sap.length;
+  const remain = currentDay.sap.filter(r=>r.status!=='Completed').length;
+  document.getElementById('wp-total').textContent = total;
+  document.getElementById('wp-remain').textContent = remain;
+  document.getElementById('wp-closeTime').value = currentDay.workPermit.closeTime;
+}
+document.getElementById('addSapRow').addEventListener('click', ()=>{
+  currentDay.sap.push({id:uid(),sapNo:'',detail:'',status:'Not yet',remark:''});
+  scheduleSave(); renderSap();
+});
+document.getElementById('wp-closeTime').addEventListener('input', e=>{ currentDay.workPermit.closeTime=e.target.value; scheduleSave(); });
+
+/* ================= Steam tracking ================= */
+function renderSteam(){
+  const rows = currentDay.steam;
+  document.getElementById('steamTableBody').innerHTML = rows.map(r=>`
+    <tr data-id="${r.id}">
+      <td><input class="cell-input steam-f mono" data-f="item" value="${esc(r.item)}" placeholder="Item"></td>
+      <td><input class="cell-input steam-f mono" data-f="range" value="${esc(r.range)}" placeholder="07:30-19:30"></td>
+      <td class="num"><input class="cell-input num steam-f" data-f="target" value="${esc(r.target)}" placeholder="0"></td>
+      <td class="num"><input class="cell-input num steam-f" data-f="actual" value="${esc(r.actual)}" placeholder="0"></td>
+      <td><button class="rowdel steam-del">🗑️</button></td>
+    </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">ยังไม่มีรายการวัด</td></tr>';
+  document.querySelectorAll('.steam-f').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const id = inp.closest('tr').dataset.id;
+      const row = currentDay.steam.find(r=>r.id===id);
+      row[inp.dataset.f] = inp.value; scheduleSave();
+    });
+  });
+  document.querySelectorAll('.steam-del').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.closest('tr').dataset.id;
+      currentDay.steam = currentDay.steam.filter(r=>r.id!==id);
+      scheduleSave(); renderSteam();
+    });
+  });
+}
+document.getElementById('addSteamRow').addEventListener('click', ()=>{
+  currentDay.steam.push({id:uid(),item:'',range:'',target:'',actual:''});
+  scheduleSave(); renderSteam();
+});
+
+/* ================= NaOH checklist ================= */
+function naohGet(path){ const [a,b]=path.split('.'); return currentDay.naoh[a][b]; }
+function naohSet(path,val){ const [a,b]=path.split('.'); currentDay.naoh[a][b]=val; }
+function renderNaoh(){
+  const n = currentDay.naoh;
+  document.getElementById('naohChecklist').innerHTML = `
+    <div class="naoh-row">
+      <span class="naoh-label"><b>PM-901 high pressure (M)</b></span>
+      <input class="cell-input mono naoh-time" id="naoh-batch-time" value="${esc(n.batch.time)}" placeholder="00:00">
+    </div>
+    <div class="naoh-row naoh-sub">
+      <span class="naoh-sub-label">Total # <input class="cell-input num naoh-total-input" id="naoh-batch-total" value="${esc(n.batch.total)}" placeholder="0"> ; Batch/No.</span>
+      <div class="unit-group batch-no-group" data-target="batch.batchNo">
+        ${CONFIG.naohBatchNumbers.map(b=>`<button class="unit-chip" data-val="${b}" aria-pressed="${n.batch.batchNo===String(b)}">${b}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="naoh-row">
+      <span class="naoh-label">NaOH washing ML line → PD-403 from</span>
+      <input class="cell-input mono naoh-time" id="naoh-mlpd403-time" value="${esc(n.mlPd403.time)}" placeholder="00:00">
+    </div>
+    <div class="naoh-row naoh-sub">
+      <span class="naoh-sub-label">@ PM-401
+        <span class="unit-group" data-target="mlPd403.units">${CONFIG.naohUnitsPM401.map(u=>`<button class="unit-chip" data-val="${u}" aria-pressed="${n.mlPd403.units.includes(u)}">${u}</button>`).join('')}</span>
+        (BTM PD-403)</span>
+    </div>
+
+    <div class="naoh-row">
+      <span class="naoh-label">NaOH washing PJ-404</span>
+      <input class="cell-input mono naoh-time" id="naoh-pj404-time" value="${esc(n.pj404.time)}" placeholder="00:00">
+      <div class="miniseg" data-target="pj404.done">
+        <button class="yes-opt" data-val="yes" aria-pressed="${n.pj404.done==='yes'}">Yes</button>
+        <button class="ok-opt" data-val="no" aria-pressed="${n.pj404.done==='no'}">No</button>
+      </div>
+    </div>
+
+    <div class="naoh-row">
+      <span class="naoh-label">NaOH washing PP-404 to PW-901</span>
+      <input class="cell-input mono naoh-time" id="naoh-pp404-time" value="${esc(n.pp404pw901.time)}" placeholder="00:00">
+    </div>
+    <div class="naoh-row naoh-sub">
+      <span class="naoh-sub-label">@ PP-404
+        <span class="unit-group" data-target="pp404pw901.units">${CONFIG.naohUnitsPP404.map(u=>`<button class="unit-chip" data-val="${u}" aria-pressed="${n.pp404pw901.units.includes(u)}">${u}</button>`).join('')}</span>
+      </span>
+    </div>
+
+    <div class="naoh-row">
+      <span class="naoh-label">NaOH Flushing LI-2901</span>
+      <input class="cell-input mono naoh-time" id="naoh-li2901-time" value="${esc(n.li2901.time)}" placeholder="00:00">
+      <div class="miniseg" data-target="li2901.done">
+        <button class="yes-opt" data-val="yes" aria-pressed="${n.li2901.done==='yes'}">Yes</button>
+        <button class="ok-opt" data-val="no" aria-pressed="${n.li2901.done==='no'}">No</button>
+      </div>
+    </div>
+
+    <div class="naoh-row">
+      <span class="naoh-label">NaOH washing PM-901</span>
+      <input class="cell-input mono naoh-time" id="naoh-pm901wash-time" value="${esc(n.pm901wash.time)}" placeholder="00:00">
+    </div>
+
+    <div class="naoh-row">
+      <span class="naoh-label">Start PM-901 operation</span>
+      <input class="cell-input mono naoh-time" id="naoh-startpm901-time" value="${esc(n.startPm901.time)}" placeholder="00:00">
+    </div>
+
+    <div class="naoh-row">
+      <span class="naoh-label" style="color:var(--red);font-weight:600">Request CTA unit prepare 4% NaOH</span>
+      <div class="miniseg" data-target="requestCta.done">
+        <button class="yes-opt" data-val="yes" aria-pressed="${n.requestCta.done==='yes'}">Yes</button>
+        <button class="ok-opt" data-val="no" aria-pressed="${n.requestCta.done==='no'}">No</button>
+      </div>
+    </div>
+  `;
+
+  function bindTimeField(id, path){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('input', ()=>{ naohSet(path, el.value); scheduleSave(); });
+  }
+  bindTimeField('naoh-batch-time', 'batch.time');
+  bindTimeField('naoh-batch-total', 'batch.total');
+  bindTimeField('naoh-mlpd403-time', 'mlPd403.time');
+  bindTimeField('naoh-pj404-time', 'pj404.time');
+  bindTimeField('naoh-pp404-time', 'pp404pw901.time');
+  bindTimeField('naoh-li2901-time', 'li2901.time');
+  bindTimeField('naoh-pm901wash-time', 'pm901wash.time');
+  bindTimeField('naoh-startpm901-time', 'startPm901.time');
+
+  document.querySelectorAll('.unit-group.batch-no-group').forEach(group=>{
+    group.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        naohSet('batch.batchNo', btn.dataset.val);
+        scheduleSave();
+        group.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b===btn ? 'true':'false'));
+      });
+    });
+  });
+
+  document.querySelectorAll('.unit-group:not(.batch-no-group)').forEach(group=>{
+    const [a,b] = group.dataset.target.split('.');
+    group.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const arr = currentDay.naoh[a][b];
+        const val = btn.dataset.val;
+        const idx = arr.indexOf(val);
+        if(idx>=0) arr.splice(idx,1); else arr.push(val);
+        scheduleSave();
+        btn.setAttribute('aria-pressed', idx>=0 ? 'false' : 'true');
+      });
+    });
+  });
+
+  document.querySelectorAll('#naohChecklist .miniseg').forEach(seg=>{
+    const target = seg.dataset.target;
+    seg.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        naohSet(target, btn.dataset.val);
+        scheduleSave();
+        seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', b===btn?'true':'false'));
+      });
+    });
+  });
+}
+
+/* ================= History / search ================= */
+let allDaysCache = [];
+async function renderHistory(){
+  const entries = await dbManager.allEntries();
+  allDaysCache = entries.sort((a,b)=>b[0].localeCompare(a[0]));
+  // build tag chips from top EQ tags across all data
+  const tagCounts = {};
+  allDaysCache.forEach(([,day])=>{
+    (day.dailyWork||[]).forEach(e=>(e.tags||[]).forEach(t=>{tagCounts[t]=(tagCounts[t]||0)+1;}));
+  });
+  const topTags = Object.keys(tagCounts).sort((a,b)=>tagCounts[b]-tagCounts[a]).slice(0,6);
+  const chipsHtml = topTags.map(t=>`<button class="chip" data-q="${esc(t)}">${esc(t)}</button>`).join('')
+    + `<button class="chip" data-q="⭐">⭐ เฉพาะตัวแดง</button>`;
+  document.getElementById('histChips').innerHTML = chipsHtml;
+  let activeChip = '';
+  document.querySelectorAll('#histChips .chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const on = btn.getAttribute('aria-pressed')!=='true';
+      document.querySelectorAll('#histChips .chip').forEach(b=>b.setAttribute('aria-pressed','false'));
+      btn.setAttribute('aria-pressed', on?'true':'false');
+      activeChip = on ? btn.dataset.q : '';
+      doFilter();
+    });
+  });
+  const searchInput = document.getElementById('histSearch');
+  searchInput.oninput = doFilter;
+  function doFilter(){ filterHistory(searchInput.value.trim(), activeChip); }
+  doFilter();
+}
+function filterHistory(q, chipQuery){
+  const box = document.getElementById('histResults');
+  box.innerHTML=''; let total=0;
+  const qLower=q.toLowerCase();
+  allDaysCache.forEach(([dateStr,day])=>{
+    const items=[];
+    (day.dailyWork||[]).forEach(e=>items.push({time:e.time,text:e.text.split('\n')[0],important:!!e.important,tags:e.tags||[]}));
+    (day.qualityLog||[]).forEach(e=>items.push({time:e.time,text:e.text,important:false,tags:e.tags||[]}));
+    const hits = items.filter(it=>{
+      const okChip = !chipQuery || (chipQuery==='⭐' ? it.important : it.tags.some(t=>t.toUpperCase()===chipQuery.toUpperCase()) || it.text.toUpperCase().indexOf(chipQuery.toUpperCase())>=0);
+      const okQ = !q || it.text.toLowerCase().indexOf(qLower)>=0 || it.time.indexOf(q)>=0;
+      return okChip && okQ;
+    }).sort((a,b)=>a.time.localeCompare(b.time));
+    if(!hits.length) return;
+    total+=hits.length;
+    const sec=document.createElement('div'); sec.className='hist-day';
+    sec.innerHTML = `<h3>📅 ${dateStr} <span class="cnt">(${hits.length} รายการ)</span> <button data-date="${dateStr}">ไปที่วันนี้ →</button></h3>`;
+    sec.querySelector('button').addEventListener('click', ()=>{
+      goToDate(dateStr);
+      document.querySelector('.tabs [data-tab="daily"]').click();
+    });
+    hits.forEach(it=>{
+      const div=document.createElement('div');
+      div.className='hist-item'+(it.important?' red-item':'');
+      let body=esc(it.text);
+      if(q){ const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'); body=body.replace(re,'<mark>$1</mark>'); }
+      div.innerHTML = `<span class="ht">${esc(it.time)}</span><span class="htxt">${body}</span>`;
+      div.addEventListener('click', ()=>{ goToDate(dateStr); document.querySelector('.tabs [data-tab="daily"]').click(); });
+      sec.appendChild(div);
+    });
+    box.appendChild(sec);
+  });
+  if(!total) box.innerHTML = `<p class="no-result">ไม่พบรายการที่ตรงกับ "${esc(q||chipQuery)}"</p>`;
+}
+
+/* ================= Settings modal (backup / restore) ================= */
+function openSettingsModal(){
+  const root = document.getElementById('settingsModalRoot');
+  root.innerHTML = `
+    <div class="modal-overlay"></div>
+    <div class="modal"><div class="modal-card">
+      <h3>จัดการข้อมูล <button class="iconbtn" id="closeSettings">✕</button></h3>
+      <div class="row"><div class="t"><b>สำรองข้อมูลทั้งหมด</b><span>ดาวน์โหลดไฟล์ .json เก็บไว้ หรือย้ายไปเครื่องอื่น</span></div><button class="btn primary" id="exportBtn">ส่งออก</button></div>
+      <div class="row"><div class="t"><b>นำเข้าข้อมูลจากไฟล์สำรอง</b><span>จะรวมกับข้อมูลปัจจุบัน (วันที่ซ้ำจะถูกเขียนทับ)</span></div><button class="btn" id="importBtn">นำเข้า</button></div>
+      <div class="row"><div class="t"><b>จำนวนวันที่มีข้อมูล</b><span id="dayCountText">—</span></div></div>
+      <p class="note" style="margin-top:10px">💡 ข้อมูลตอนนี้เก็บอยู่ในเบราว์เซอร์นี้เท่านั้น (IndexedDB) ยังไม่ sync ข้ามเครื่อง/ข้ามคน — ใช้สำรอง/นำเข้าเพื่อย้ายข้อมูลไปเครื่องอื่นได้ก่อนที่จะมีฐานข้อมูลกลาง</p>
+    </div></div>`;
+  root.querySelector('.modal-overlay').addEventListener('click', closeSettingsModal);
+  document.getElementById('closeSettings').addEventListener('click', closeSettingsModal);
+  document.getElementById('exportBtn').addEventListener('click', exportData);
+  document.getElementById('importBtn').addEventListener('click', ()=>document.getElementById('importFileInput').click());
+  dbManager.allKeys().then(keys=>{ document.getElementById('dayCountText').textContent = keys.length+' วัน'; });
+}
+function closeSettingsModal(){ document.getElementById('settingsModalRoot').innerHTML=''; }
+document.getElementById('settingsBtn').addEventListener('click', openSettingsModal);
+
+async function exportData(){
+  const entries = await dbManager.allEntries();
+  const obj = {}; entries.forEach(([k,v])=>obj[k]=v);
+  const blob = new Blob([JSON.stringify(obj,null,2)], {type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download = `shift-logbook-backup-${todayStr()}.json`; a.click(); URL.revokeObjectURL(a.href);
+  toast('ส่งออกข้อมูลสำเร็จ!');
+}
+document.getElementById('importFileInput').addEventListener('change', function(){
+  const file=this.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      const keys=Object.keys(data);
+      if(!keys.length) throw new Error('ไฟล์ว่างเปล่า');
+      if(!confirm(`นำเข้าข้อมูล ${keys.length} วัน? วันที่ซ้ำกับที่มีอยู่จะถูกเขียนทับ`)) return;
+      for(const k of keys){ await dbManager.set(k, data[k]); }
+      toast('นำเข้าข้อมูลสำเร็จ!');
+      closeSettingsModal();
+      currentDay = await loadDay(currentDate);
+      renderAll();
+    }catch(err){ toast('ไฟล์ไม่ถูกต้อง: '+err.message); }
+    finally{ this.value=''; }
+  };
+  reader.readAsText(file);
+});
+
+/* ================= Toast ================= */
+let toastTimer=null;
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+/* ================= Photo viewer (lightbox) ================= */
+function openPhotoViewer(photos, startIndex){
+  const root = document.getElementById('photoViewerRoot');
+  let idx = startIndex || 0;
+  function render(){
+    const multi = photos.length > 1;
+    root.innerHTML = `
+      <div class="pv-overlay"></div>
+      <div class="pv-modal"><img src="${photos[idx]}" alt="รูปแนบขนาดเต็ม"></div>
+      <button class="pv-close" title="ปิด (Esc)">✕</button>
+      ${multi ? '<button class="pv-nav pv-prev" title="ก่อนหน้า">‹</button><button class="pv-nav pv-next" title="ถัดไป">›</button>' : ''}
+      ${multi ? `<div class="pv-count">${idx+1} / ${photos.length}</div>` : ''}
+    `;
+    root.querySelector('.pv-overlay').addEventListener('click', closeViewer);
+    root.querySelector('.pv-close').addEventListener('click', closeViewer);
+    const prevBtn = root.querySelector('.pv-prev');
+    const nextBtn = root.querySelector('.pv-next');
+    if(prevBtn) prevBtn.addEventListener('click', ()=>{ idx=(idx-1+photos.length)%photos.length; render(); });
+    if(nextBtn) nextBtn.addEventListener('click', ()=>{ idx=(idx+1)%photos.length; render(); });
+  }
+  function onKey(e){
+    if(e.key==='Escape') closeViewer();
+    else if(e.key==='ArrowLeft' && photos.length>1){ idx=(idx-1+photos.length)%photos.length; render(); }
+    else if(e.key==='ArrowRight' && photos.length>1){ idx=(idx+1)%photos.length; render(); }
+  }
+  function closeViewer(){ root.innerHTML=''; document.removeEventListener('keydown', onKey); }
+  document.addEventListener('keydown', onKey);
+  render();
+}
+
+/* ================= Render all ================= */
+function renderAll(){
+  renderOverview();
+  renderDailyWork();
+  renderQualityLog();
+  renderQualityPanel();
+  renderSafetyChecklist();
+  renderAlarms();
+  renderSilo();
+  renderPlanLoading();
+  renderSop();
+  renderSap();
+  renderSteam();
+  renderNaoh();
+}
+
+/* ================= Init ================= */
+(async function init(){
+  await dbManager.init();
+  await seedSampleIfEmpty();
+  if(!localStorage.getItem('logbook_lastDate')){
+    const keys = await dbManager.allKeys();
+    if(keys.includes('2026-07-07') && keys.length===1) currentDate='2026-07-07';
+  }
+  currentDay = await loadDay(currentDate);
+  dateInput.value = currentDate;
+  renderAll();
+
+  wireComposer(document.querySelector('.composer[data-section="dailyWork"]'), (entry)=>{
+    const hh = parseInt(entry.time.split(':')[0],10);
+    const shift = (hh>=8 && hh<20) ? 'day' : 'night';
+    currentDay.dailyWork.push(Object.assign({id:uid(),shift,author:'คุณ'}, entry));
+    saveNow(); renderDailyWork(); renderOverview();
+    toast('บันทึกลง '+(shift==='day'?'กะเช้า ☀️':'กะดึก 🌙')+' แล้ว');
+    (shift==='day'?document.getElementById('dayHead'):document.getElementById('nightHead')).scrollIntoView({behavior:'smooth'});
+  });
+  wireComposer(document.querySelector('.composer[data-section="qualityLog"]'), (entry)=>{
+    currentDay.qualityLog.push(Object.assign({id:uid()}, entry));
+    saveNow(); renderQualityLog();
+    toast('บันทึกลง Quality Control Log แล้ว');
+  });
+})();
+
+})();
+</script>
+</body>
+</html>
