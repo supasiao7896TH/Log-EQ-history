@@ -92,6 +92,19 @@ Fixed in roughly this order — see git log for details:
    new users" deprecation error surfaces as 400/403 with a message instead, so
    the retry loop now also treats that as a signal to auto-discover and switch
    to a live model.
+9. Auto-discovery from item 8 kept failing anyway: Google's `ListModels` now
+   returns *several* models with `flash` in the name (`gemini-2.0-flash`,
+   `gemini-2.5-flash`, `gemini-flash-latest`, newer GA flash models, etc.),
+   and some of those are themselves already deprecated. `supported.find(m =>
+   m.name.includes('flash'))` would grab whichever one came first in Google's
+   list order — often a dead one — burning through the whole
+   `maxModelSwitches` budget on bad picks before ever trying a real model, so
+   the user just saw the original deprecation error again. Fixed by trying
+   the durable `gemini-flash-latest` alias directly first (no discovery call
+   needed — Google keeps it repointed at a current model), tracking
+   already-tried model names so discovery can't re-pick a model that just
+   failed, and only then falling back to live discovery (preferring
+   `latest`+`flash`, then any `flash`, then any `latest` alias).
 
 ## Known external quirks worth remembering
 
