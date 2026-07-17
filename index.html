@@ -13,7 +13,6 @@
     <link rel="apple-touch-icon" href="icons/icon-192.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
@@ -161,7 +160,6 @@
     <div id="handover-modal" class="hidden"></div>
     <div id="image-viewer-modal" class="hidden"></div>
     <div id="confirm-modal" class="hidden"></div>
-    <div id="import-modal" class="hidden"></div>
     <div id="toast-notification" class="toast-notification neumorphic-card p-4 bg-white text-slate-700"></div>
 
     <template id="api-key-modal-template">
@@ -309,7 +307,6 @@
             <div class="neumorphic-card p-4 md:p-8 mb-8">
                 <div class="flex flex-col md:flex-row justify-between items-center mb-4 md:mb-6 border-b border-slate-300 pb-3">
                     <h2 class="text-lg md:text-xl font-semibold text-slate-800">บันทึกข้อมูลใหม่</h2>
-                    <button id="import-from-excel-btn" class="neumorphic-button font-bold text-green-600 py-2 px-4 flex items-center mt-3 md:mt-0 text-sm"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>นำเข้าจาก Excel</button>
                 </div>
                 <form id="log-form" class="grid grid-cols-2 gap-3 md:gap-6">
                     <div><label for="log-date" class="block text-xs md:text-sm font-medium text-slate-600 mb-1 md:mb-2">วันที่และเวลาที่บันทึก</label><input type="datetime-local" id="log-date" required class="neumorphic-inset w-full p-2 md:p-3 focus:outline-none text-slate-700 text-sm"></div>
@@ -411,28 +408,6 @@
         </div>
     </template>
 
-    <template id="import-modal-template">
-        <div class="modal-overlay"></div>
-        <div class="modal-container w-11/12 max-w-lg">
-            <div class="neumorphic-card p-6 md:p-8 relative">
-                <button id="close-import-btn" class="absolute top-4 right-4 neumorphic-button p-2"><svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-                <h2 class="text-2xl font-bold text-slate-800 mb-6">นำเข้าข้อมูลจาก Excel</h2>
-                <div class="space-y-6">
-                    <div><label for="import-file-input" class="block text-sm font-medium text-slate-600 mb-2">ขั้นตอนที่ 1: เลือกไฟล์ (.xlsx)</label><input type="file" id="import-file-input" accept=".xlsx" class="neumorphic-inset w-full p-2 text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"></div>
-                    <div><label for="import-sheet-selector" class="block text-sm font-medium text-slate-600 mb-2">ขั้นตอนที่ 2: เลือกชีต (วันที่)</label><select id="import-sheet-selector" disabled class="neumorphic-inset w-full p-3 appearance-none focus:outline-none text-slate-700 disabled:opacity-50"></select></div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-2">ขั้นตอนที่ 3: เลือกกะที่ต้องการนำเข้า</label>
-                        <div id="import-shift-selector" class="grid grid-cols-2 gap-4">
-                            <label class="neumorphic-inset p-4 text-center rounded-lg cursor-pointer has-[:checked]:bg-blue-100 has-[:checked]:shadow-inner"><input type="radio" name="shift-option" value="day" class="sr-only" disabled><span class="font-semibold text-slate-700">☀️ กะเช้า</span></label>
-                            <label class="neumorphic-inset p-4 text-center rounded-lg cursor-pointer has-[:checked]:bg-blue-100 has-[:checked]:shadow-inner"><input type="radio" name="shift-option" value="night" class="sr-only" disabled><span class="font-semibold text-slate-700">🌙 กะดึก</span></label>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-8"><button id="confirm-import-btn" disabled class="neumorphic-button w-full font-bold text-green-600 py-3 px-4 disabled:opacity-50">ยืนยันการนำเข้าข้อมูล</button></div>
-            </div>
-        </div>
-    </template>
-
     <script>
     document.addEventListener('DOMContentLoaded', () => {
 
@@ -440,8 +415,7 @@
             appPrefix: 'spa_v17',
             get: function(key) { return `${this.appPrefix}_${key}`; },
             categoryColors: { "PUMP": "text-sky-600 border-sky-400", "AGITATOR": "text-orange-600 border-orange-400", "BLOWER, COMP.": "text-lime-600 border-lime-400", "SEPARATOR, FILTER": "text-amber-600 border-amber-400", "ROTARY VALVE": "text-rose-600 border-rose-400", "STATIC": "text-teal-600 border-teal-400", "EI": "text-violet-600 border-violet-400", "EE": "text-fuchsia-600 border-fuchsia-400", "PIPING": "text-cyan-600 border-cyan-400", "AIR KNOCKER": "text-pink-600 border-pink-400" },
-            defaultEquipment: { "PUMP": ["PP-101A", "PP-101B", "PP-102A", "PP-102B", "PP-102C", "PP-103A", "PP-103B", "PP-201A", "PP-201B", "PP-304A", "PP-304B", "PP-402A", "PP-402B", "PP-404A", "PP-404B", "PP-405A", "PP-405B", "PP-406A", "PP-406B", "PP-410", "PP450", "PP-501A", "PP-501B", "PP-502A", "PP-502B", "PP-503A", "PP-503B", "PP-504A", "PP-504B", "PP-600", "PP-601A", "PP-601B", "PP-601C", "PP-603", "TP-800A", "TP-800B", "TP-802A", "TP-802B", "PP-100", "PP-901", "PP-102A-1", "PP-102B-1", "PP-102C-1", "PX-401A (SP)", "PX-401A (SC)", "PX-401A (GB)", "PX-401B (SP)", "PX-401B (SC)", "PX-401B (GB)", "PP-801", "PP-802", "PP-803", "PP-804", "PP-805"], "AGITATOR": ["PJ-101", "PJ-301", "PJ-302", "PJ-303", "PJ-304", "PJ-401", "PJ-402", "PJ-404"], "BLOWER, COMP.": ["PC-201A", "PC-201B", "PC-401", "PC-403A", "PC-403B", "PC-601", "PC-602", "PC-901"], "SEPARATOR, FILTER": ["PM-101-1", "PM-101-2", "PM-102", "PM-105", "PM-401A", "PM-401B", "PM-402A", "PM-402B", "PM-404-1", "PM-404-2", "PM-404-3", "PM-404-4", "PM-802A", "PM-802B", "PM-802C", "PM-804A", "PM-804B", "PM-804C", "PM-901", "PM-902", "PM-401D"], "ROTARY VALVE": ["PZ-100", "TZ-400", "PZ-403", "PZ-800A", "PZ-800B", "PZ-800C"], "STATIC": ["PM-500A", "PM-500B", "PM-803A", "PM-803B", "PM-803C", "PM-104", "PTK-800A", "PTK-800B", "PTK-800C", "PW-901", "TTK-400", "PE-101A", "PE-101B", "PE-101C", "PE-101D", "PE-101E", "PE-101F"], "EI": ["PG FG TG LG local", "DCS", "Control valve", "On / Off valve"], "EE": ["EE all"], "PIPING": ["Piping all"], "AIR KNOCKER": ["Air knocker all"] },
-            excelDataMap: { date: 'O5', shiftDay: 'M9', shiftNight: 'M10', dayDetails: { start: 76, end: 117 }, nightDetails: { start: 119, end: 145 } }
+            defaultEquipment: { "PUMP": ["PP-101A", "PP-101B", "PP-102A", "PP-102B", "PP-102C", "PP-103A", "PP-103B", "PP-201A", "PP-201B", "PP-304A", "PP-304B", "PP-402A", "PP-402B", "PP-404A", "PP-404B", "PP-405A", "PP-405B", "PP-406A", "PP-406B", "PP-410", "PP450", "PP-501A", "PP-501B", "PP-502A", "PP-502B", "PP-503A", "PP-503B", "PP-504A", "PP-504B", "PP-600", "PP-601A", "PP-601B", "PP-601C", "PP-603", "TP-800A", "TP-800B", "TP-802A", "TP-802B", "PP-100", "PP-901", "PP-102A-1", "PP-102B-1", "PP-102C-1", "PX-401A (SP)", "PX-401A (SC)", "PX-401A (GB)", "PX-401B (SP)", "PX-401B (SC)", "PX-401B (GB)", "PP-801", "PP-802", "PP-803", "PP-804", "PP-805"], "AGITATOR": ["PJ-101", "PJ-301", "PJ-302", "PJ-303", "PJ-304", "PJ-401", "PJ-402", "PJ-404"], "BLOWER, COMP.": ["PC-201A", "PC-201B", "PC-401", "PC-403A", "PC-403B", "PC-601", "PC-602", "PC-901"], "SEPARATOR, FILTER": ["PM-101-1", "PM-101-2", "PM-102", "PM-105", "PM-401A", "PM-401B", "PM-402A", "PM-402B", "PM-404-1", "PM-404-2", "PM-404-3", "PM-404-4", "PM-802A", "PM-802B", "PM-802C", "PM-804A", "PM-804B", "PM-804C", "PM-901", "PM-902", "PM-401D"], "ROTARY VALVE": ["PZ-100", "TZ-400", "PZ-403", "PZ-800A", "PZ-800B", "PZ-800C"], "STATIC": ["PM-500A", "PM-500B", "PM-803A", "PM-803B", "PM-803C", "PM-104", "PTK-800A", "PTK-800B", "PTK-800C", "PW-901", "TTK-400", "PE-101A", "PE-101B", "PE-101C", "PE-101D", "PE-101E", "PE-101F"], "EI": ["PG FG TG LG local", "DCS", "Control valve", "On / Off valve"], "EE": ["EE all"], "PIPING": ["Piping all"], "AIR KNOCKER": ["Air knocker all"] }
         };
 
         const IDB_CONFIG = { name: 'SmartProduction_IDB', version: 2, store: 'appData' };
@@ -480,8 +454,6 @@
         const handoverModal = document.getElementById('handover-modal');
         const imageViewerModal = document.getElementById('image-viewer-modal');
         const confirmModal = document.getElementById('confirm-modal');
-        const importModal = document.getElementById('import-modal');
-        const importModalTemplate = document.getElementById('import-modal-template');
         const apiKeyModalTemplate = document.getElementById('api-key-modal-template');
         const managerModalTemplate = document.getElementById('manager-modal-template');
         const chatbotModalTemplate = document.getElementById('chatbot-modal-template');
@@ -498,7 +470,6 @@
         let chatHistory = [];
         let chartInstances = {};
         let currentImageFile = null;
-        let excelWorkbook = null;
         let toastTimer = null;
         let currentSuggestion = '';
         let isGeminiCallInFlight = false;
@@ -658,7 +629,6 @@
             views.detail.querySelector('#log-filter-status').addEventListener('change', handleLogFilterChange);
             views.detail.querySelector('#log-image').addEventListener('change', handleImageSelect);
             views.detail.querySelector('#ai-image-analysis-btn').addEventListener('click', handleImageAnalysis);
-            views.detail.querySelector('#import-from-excel-btn').addEventListener('click', openImportModal);
             const logDetailsTextarea = views.detail.querySelector('#log-details');
             logDetailsTextarea.addEventListener('input', handlePredictiveText);
             logDetailsTextarea.addEventListener('keydown', handlePredictiveTextKeydown);
@@ -797,13 +767,6 @@
         }
 
         function handleImportData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { let importedData = JSON.parse(e.target.result); if (importedData.equipment && Array.isArray(importedData.equipment) && !Object.keys(importedData).some(key => key.startsWith(CONFIG.appPrefix))) { importedData = convertV8BackupToV17(importedData); } if (!Object.keys(importedData).some(key => key.startsWith(CONFIG.appPrefix))) { throw new Error("ไฟล์ข้อมูลไม่ถูกต้องหรือไม่ตรงกับเวอร์ชันของแอป"); } showConfirmModal('คุณแน่ใจหรือไม่ที่จะนำเข้าข้อมูล? ข้อมูลปัจจุบันทั้งหมดจะถูกเขียนทับ!', async () => { await dbManager.clear(); for (const key in importedData) { if (key.includes('api_key') || key.includes('selectedPlant')) { localStorage.setItem(key, importedData[key]); } else if (key.startsWith(CONFIG.appPrefix)) { await dbManager.set(key, importedData[key]); } } localStorage.setItem('spa_v17_migrated_to_idb', 'true'); showToast("นำเข้าข้อมูลสำเร็จ! แอปจะทำการรีโหลด"); setTimeout(() => location.reload(), 1500); }); } catch (error) { showToast(`เกิดข้อผิดพลาดในการนำเข้า: ${error.message}`, true); } finally { event.target.value = ''; } }; reader.readAsText(file); }
-
-        function openImportModal() { importModal.innerHTML = importModalTemplate.innerHTML; importModal.classList.remove('hidden'); importModal.querySelector('#close-import-btn').addEventListener('click', () => importModal.classList.add('hidden')); importModal.querySelector('#import-file-input').addEventListener('change', handleExcelFileSelect); importModal.querySelector('#confirm-import-btn').addEventListener('click', handleConfirmImport); importModal.querySelector('#import-sheet-selector').addEventListener('change', updateConfirmBtnState); importModal.querySelector('#import-shift-selector').addEventListener('change', updateConfirmBtnState); }
-        function updateConfirmBtnState() { const confirmBtn = importModal.querySelector('#confirm-import-btn'); const sheet = importModal.querySelector('#import-sheet-selector').value; const shift = importModal.querySelector('input[name="shift-option"]:checked'); confirmBtn.disabled = !(sheet && shift); }
-        function handleExcelFileSelect(event) { const file = event.target.files[0]; if (!file) return; const sheetSelector = importModal.querySelector('#import-sheet-selector'); const shiftRadios = importModal.querySelectorAll('input[name="shift-option"]'); const confirmBtn = importModal.querySelector('#confirm-import-btn'); const reader = new FileReader(); reader.onload = (e) => { try { const data = new Uint8Array(e.target.result); excelWorkbook = XLSX.read(data, { type: 'array' }); sheetSelector.innerHTML = '<option value="">-- เลือกชีต --</option>'; excelWorkbook.SheetNames.forEach(sheetName => { const option = document.createElement('option'); option.value = sheetName; option.textContent = sheetName; sheetSelector.appendChild(option); }); sheetSelector.disabled = false; shiftRadios.forEach(radio => radio.disabled = false); showToast("อ่านไฟล์ Excel สำเร็จ! กรุณาเลือกชีตและกะ"); } catch (error) { showToast("ไฟล์ Excel ไม่ถูกต้องหรือไม่สามารถอ่านได้", true); excelWorkbook = null; sheetSelector.disabled = true; shiftRadios.forEach(radio => radio.disabled = true); confirmBtn.disabled = true; } }; reader.readAsArrayBuffer(file); }
-        function handleConfirmImport() { const sheetName = importModal.querySelector('#import-sheet-selector').value; const shiftType = importModal.querySelector('input[name="shift-option"]:checked').value; if (!excelWorkbook || !sheetName || !shiftType) { showToast("ข้อมูลไม่ครบถ้วน กรุณาเลือกไฟล์, ชีต, และกะ", true); return; } try { const worksheet = excelWorkbook.Sheets[sheetName]; const jsonSheet = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" }); const getCellValue = (cellRef) => { const cell = worksheet[cellRef]; return cell ? cell.w || cell.v : ''; }; const dateValue = getCellValue(CONFIG.excelDataMap.date); const shiftCellRef = shiftType === 'day' ? CONFIG.excelDataMap.shiftDay : CONFIG.excelDataMap.shiftNight; const shiftRawValue = getCellValue(shiftCellRef); const { shift, recorder } = parseShiftAndRecorder(shiftRawValue); let details = ''; const selectedRange = shiftType === 'day' ? CONFIG.excelDataMap.dayDetails : CONFIG.excelDataMap.nightDetails; for (let i = selectedRange.start; i <= selectedRange.end; i++) { const row = jsonSheet[i]; if (row && row.length > 0) { const rowText = row.map((cell, index) => { const text = String(cell).trim(); if (index === 0 && /^\d{1,2}:\d{2}/.test(text)) { return `${text} -`; } return text; }).filter(text => text !== '').join(' '); if (rowText) { details += `${rowText}\n`; } } } const form = views.detail.querySelector('#log-form'); form.querySelector('#log-date').value = `${excelDateToJSDate(dateValue)}T00:00`; form.querySelector('#log-shift').value = shift; form.querySelector('#log-recorder').value = recorder; form.querySelector('#log-details').value = details.trim(); form.querySelector('#log-status').value = 'Open'; showToast("นำเข้าข้อมูลลงในฟอร์มเรียบร้อยแล้ว!"); importModal.classList.add('hidden'); } catch (error) { showToast("เกิดข้อผิดพลาดระหว่างการประมวลผลข้อมูลจากชีต", true); } }
-        function parseShiftAndRecorder(cellValue) { if (!cellValue || typeof cellValue !== 'string') return { shift: '', recorder: '' }; const parts = cellValue.trim().split(/\s+/); const shift = parts[0] || ''; const recorder = parts.slice(1).join(' ') || ''; return { shift, recorder }; }
-        function excelDateToJSDate(excelDate) { if (typeof excelDate === 'number') { const utc_days = Math.floor(excelDate - 25569); const date = new Date(utc_days * 86400000); const year = date.getUTCFullYear(); const month = String(date.getUTCMonth() + 1).padStart(2, '0'); const day = String(date.getUTCDate()).padStart(2, '0'); return `${year}-${month}-${day}`; } if (typeof excelDate === 'string') { const parts = excelDate.match(/(\d+)[/-](\d+)[/-](\d+)/); if (parts) { let year, month, day; if (parts[1].length === 4) { [ , year, month, day] = parts; } else { [ , day, month, year] = parts; } if (year.length === 2) year = `20${year}`; if (parseInt(year, 10) > 2500) year = String(parseInt(year, 10) - 543); return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`; } } return new Date().toISOString().split('T')[0]; }
 
         async function initialize() {
             const savedPlant = localStorage.getItem(CONFIG.get('selectedPlant'));
