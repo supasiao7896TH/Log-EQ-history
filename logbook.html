@@ -47,7 +47,7 @@ input,textarea,select{font:inherit;color:inherit}
 /* ---------- App bar ---------- */
 .appbar{
   position:sticky;top:0;z-index:30;background:var(--panel);border-bottom:1px solid var(--line);
-  display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 16px;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:10px 16px;
 }
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
 .brand-mark{
@@ -57,16 +57,16 @@ input,textarea,select{font:inherit;color:inherit}
 .brand h1{font-size:16px;font-weight:700;line-height:1.2;white-space:nowrap}
 .brand .sub{font-size:11.5px;color:var(--muted);letter-spacing:.4px}
 .appbar .spacer{flex:1}
-.datenav{display:flex;align-items:center;gap:4px}
-.datenav button{width:28px;height:28px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);font-size:14px}
-.datenav button:hover{background:var(--accent-soft)}
+.datenav{display:flex;align-items:center;gap:8px}
+.datenav button:not(.todaybtn){width:28px;height:28px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);font-size:14px}
+.datenav button:not(.todaybtn):hover{background:var(--accent-soft)}
 .datenav input[type=date]{
   font-size:13.5px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;
   padding:4px 8px;color:var(--ink);
 }
-.todaybtn{font-size:11.5px;color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:4px 9px;white-space:nowrap}
+.todaybtn{font-size:11.5px;color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:5px 12px;letter-spacing:.2px;white-space:nowrap}
 .seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:3px;gap:2px}
-.seg button{padding:4px 12px;border-radius:6px;font-size:13px;color:var(--muted);white-space:nowrap;transition:background .15s,color .15s}
+.seg button{padding:5px 14px;border-radius:6px;font-size:13px;color:var(--muted);white-space:nowrap;letter-spacing:.2px;transition:background .15s,color .15s}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);font-weight:600}
 .iconbtn{width:32px;height:32px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);font-size:15px;display:grid;place-items:center}
 .iconbtn:hover{background:var(--accent-soft)}
@@ -134,13 +134,14 @@ td.num,th.num{text-align:right;font-family:"Cascadia Mono",Consolas,ui-monospace
 .stat .value small{font-size:12px;color:var(--muted);font-weight:400;font-family:"Leelawadee UI","Segoe UI",sans-serif}
 .bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px}
 .bar i{display:block;height:100%;background:var(--accent);border-radius:3px;transition:width .2s}
+.bar-cap{font-size:11px;color:var(--muted);white-space:nowrap;display:block;margin-top:3px}
 
 /* ---------- Crew ---------- */
 .crew{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .crew .person{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:6px 10px}
 .crew .avatar{width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:11.5px;flex:none}
 .crew .role{font-size:10px;color:var(--muted);display:block;letter-spacing:.4px}
-.crew input{border:none;background:transparent;font-size:13px;width:88px}
+.crew input,.crew select{border:none;background:transparent;font-size:13px;width:104px}
 
 /* ---------- Composer ---------- */
 .composer{border:1.5px solid var(--accent);border-radius:12px;background:var(--panel);box-shadow:var(--shadow);padding:14px 16px}
@@ -223,12 +224,18 @@ select.chip-select.neutral{background:var(--panel2);color:var(--muted);border-co
 .miniseg button[aria-pressed="true"].bad-opt{background:var(--red-soft);color:var(--red);font-weight:700}
 .miniseg button[aria-pressed="true"].yes-opt{background:var(--accent-soft);color:var(--accent);font-weight:700}
 .sop{list-style:none}
-.sop li{display:flex;gap:9px;align-items:flex-start;padding:6px 0;font-size:13px;color:var(--muted);border-bottom:1px solid var(--line)}
+.sop li{padding:7px 0;font-size:13px;color:var(--muted);border-bottom:1px solid var(--line)}
 .sop li:last-child{border-bottom:none}
-.sop li input[type=checkbox]{margin-top:3px;flex:none;accent-color:var(--accent);width:15px;height:15px}
-.sop li.done{opacity:.5;text-decoration:line-through}
+.sop-main{display:flex;gap:9px;align-items:flex-start}
+.sop-main input[type=checkbox]{margin-top:3px;flex:none;accent-color:var(--accent);width:15px;height:15px}
+.sop li.done .sop-main .txt{opacity:.5;text-decoration:line-through}
 .sop .freq{font-size:11px;background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:0 6px;white-space:nowrap;margin-left:auto}
 .sop .txt{flex:1}
+.sop-time{width:56px;text-align:center;flex:none}
+.sop-extra{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0 2px 24px;font-size:12.5px}
+.sop-extra input.cell-input.num{width:52px;display:inline-block}
+.sop-lcv-group{display:flex;gap:16px;flex-wrap:wrap}
+.sop-lcv-item{display:flex;align-items:center;gap:4px}
 
 /* ---------- NaOH washing / batch checklist ---------- */
 .naoh-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);flex-wrap:wrap;font-size:13.5px}
@@ -336,9 +343,9 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 40px;color:var(--muted);fon
   <button role="tab" aria-selected="true"  data-tab="overview">ภาพรวม</button>
   <button role="tab" aria-selected="false" data-tab="daily">Daily Work</button>
   <button role="tab" aria-selected="false" data-tab="quality">Quality &amp; Safety</button>
-  <button role="tab" aria-selected="false" data-tab="silo">Silo &amp; Loading</button>
+  <button role="tab" aria-selected="false" data-tab="silo">Silo &amp; Regular work</button>
   <button role="tab" aria-selected="false" data-tab="sap">SAP &amp; งาน MT</button>
-  <button role="tab" aria-selected="false" data-tab="steam">Steam &amp; Checks</button>
+  <button role="tab" aria-selected="false" data-tab="steam">Steam &amp; PM-901 operation</button>
   <button role="tab" aria-selected="false" data-tab="history">🔎 ย้อนหลัง</button>
 </nav>
 
@@ -365,16 +372,16 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 40px;color:var(--muted);fon
 
   <div class="grid g2 section-gap">
     <div class="card">
-      <h2>ทีมประจำกะ <span class="hint">F/M = Field · B/M = Board</span></h2>
-      <p class="note" style="margin-bottom:8px">☀️ กะเช้า 08:00 – 20:00</p>
+      <h2>ทีมประจำกะ</h2>
+      <p class="note" style="margin-bottom:8px">☀️ กะเช้า 07:30 – 19:30</p>
       <div class="crew">
-        <div class="person"><span class="avatar">F</span><span><span class="role">F/M</span><input id="crew-day-fm" placeholder="ชื่อ"></span></div>
-        <div class="person"><span class="avatar">B</span><span><span class="role">B/M</span><input id="crew-day-bm" placeholder="ชื่อ"></span></div>
+        <div class="person"><span class="avatar">F</span><span><span class="role">F/M</span><select id="crew-day-fm"></select></span></div>
+        <div class="person"><span class="avatar">B</span><span><span class="role">B/M</span><select id="crew-day-bm"></select></span></div>
       </div>
-      <p class="note" style="margin:12px 0 8px">🌙 กะดึก 20:00 – 08:00</p>
+      <p class="note" style="margin:12px 0 8px">🌙 กะดึก 19:30 – 07:30</p>
       <div class="crew">
-        <div class="person"><span class="avatar">F</span><span><span class="role">F/M</span><input id="crew-night-fm" placeholder="ชื่อ"></span></div>
-        <div class="person"><span class="avatar">B</span><span><span class="role">B/M</span><input id="crew-night-bm" placeholder="ชื่อ"></span></div>
+        <div class="person"><span class="avatar">F</span><span><span class="role">F/M</span><select id="crew-night-fm"></select></span></div>
+        <div class="person"><span class="avatar">B</span><span><span class="role">B/M</span><select id="crew-night-bm"></select></span></div>
       </div>
     </div>
     <div class="card">
@@ -430,10 +437,10 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 40px;color:var(--muted);fon
     <input type="file" class="fileInput" accept="image/*" multiple style="display:none">
   </div>
 
-  <div class="shift-head" id="dayHead">☀️ กะเช้า 08:00 – 20:00 <span class="crewline" id="dayCrewline"></span></div>
+  <div class="shift-head" id="dayHead">☀️ กะเช้า 07:30 – 19:30 <span class="crewline" id="dayCrewline"></span></div>
   <div class="timeline" id="dayTimeline"></div>
 
-  <div class="shift-head" id="nightHead">🌙 กะดึก 20:00 – 08:00 <span class="crewline" id="nightCrewline"></span></div>
+  <div class="shift-head" id="nightHead">🌙 กะดึก 19:30 – 07:30 <span class="crewline" id="nightCrewline"></span></div>
   <div class="timeline" id="nightTimeline"></div>
 </section>
 
@@ -509,7 +516,7 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 40px;color:var(--muted);fon
       </table>
     </div>
     <div class="card">
-      <h2>รายการเตือน SOP ประจำ <span class="hint">ติ๊กเมื่อทำแล้ววันนี้</span></h2>
+      <h2>รายการเตือน Regular Work <span class="hint">ติ๊กเมื่อทำแล้ววันนี้</span></h2>
       <ul class="sop" id="sopList"></ul>
     </div>
   </div>
@@ -540,11 +547,10 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 40px;color:var(--muted);fon
     <h2>Steam / Measurement Tracking <span class="hint">target vs actual</span></h2>
     <div class="scroll-x">
       <table>
-        <thead><tr><th>Item</th><th>ช่วงเวลา</th><th class="num">Target</th><th class="num">Actual</th><th></th></tr></thead>
+        <thead><tr><th>Item</th><th>ช่วงเวลา</th><th class="num">Target</th><th class="num">Actual</th></tr></thead>
         <tbody id="steamTableBody"></tbody>
       </table>
     </div>
-    <button class="addrow" id="addSteamRow">+ เพิ่มรายการวัด</button>
   </div>
 
   <div class="card section-gap">
@@ -602,21 +608,29 @@ const CONFIG = {
   alarmTags: ['PS-2611','PS-2611B','PS-2611C','AI-2400','TI-2601'],
   siloIds: ['A','B','C'],
   tankKeys: ['810A','810B','810C','820A','820B'],
+  tankCapacity: {'810A':1090,'810B':1090,'810C':1090,'820A':4500,'820B':4500},
   workTypes: ['Mechanical','Electrical','Instrument','Process'],
   workStatuses: ['รอติดตาม','เฝ้าระวัง','ปิดงานแล้ว'],
   sopReminders: [
-    {id:'sop1', txt:'Drain light oil PZ-601', freq:'ทุกวันเสาร์'},
+    {id:'sop1', txt:'Drain light oil PZ-601', freq:'ทุกวันเสาร์', extra:'liters'},
     {id:'sop2', txt:'Blow down PT-501', freq:'ทุกวันที่ 5,10,15,20,25,30'},
     {id:'sop3', txt:'NaOH washing PT-501 + purge level PD-501', freq:'ทุกวันที่ 5,20'},
-    {id:'sop4', txt:'Depressurize & drain BTM ของ PM-401', freq:'ทุกวันที่ 15,30'},
-    {id:'sop5', txt:'Test run 2PP-102 · Start lube oil PP-102', freq:'พุธ/อาทิตย์'},
-    {id:'sop6', txt:'Switching PP-101', freq:'ทุกวันที่ 16'},
-    {id:'sop7', txt:'Commissioning PI-2412', freq:'ทุกวันที่ 5,10,15,20,25,30'},
-    {id:'sop8', txt:'Check LCV-2301-3', freq:'ทุกวันที่ 1,16'},
+    {id:'sop4', txt:'Depressurize & drain BTM ของ PM-401', freq:'ทุกวันที่ 15,30', extra:'unitsAB'},
+    {id:'sop5', txt:'Switching PP-101 for run', freq:'ทุกวันที่ 16', extra:'unitsAB+kg'},
+    {id:'sop6', txt:'Commissioning PI-2412', freq:'ทุกวันที่ 5,10,15,20,25,30'},
+    {id:'sop7', txt:'Start lube oil PP-102', freq:'พุธ/อาทิตย์'},
+    {id:'sop8', txt:'Blow down PT-401', freq:'Foloow up exa. Alarm'},
+    {id:'sop9', txt:'Check LCV-2301-3', freq:'ทุกวันที่ 1,16', extra:'lcv3'},
   ],
   naohUnitsPM401: ['A','B','D'],
   naohUnitsPP404: ['A','B'],
   naohBatchNumbers: [1,2,3,4,5,6],
+  fmRoster: ['A กฤษณะ','B เฉลิมพล','C ชาญชัช','D อดุลย์'],
+  bmRoster: ['A สถิตย์','B ฐาณันตร์','B เพชร','C ศุภสิทธิ์','D วุฒิชาติ'],
+  steamItems: [
+    {key:'fc2302sv', item:'FC-2302.SV', ranges:[{key:'day', range:'07:30-19:30'},{key:'night', range:'19:30-07:30'}]},
+    {key:'fc2602mv', item:'FC2602.MV', ranges:[{key:'day', range:'07:30-19:30'},{key:'night', range:'19:30-07:30'}]},
+  ],
 };
 
 /* ================= IndexedDB wrapper ================= */
@@ -652,7 +666,7 @@ function emptyDay(dateStr){
     safety: { 1:'ok', 2:'ok', 3:'ok', 4:'ok', 5:'ok' },
     alarms: {}, silo: [], planLoading: {}, sap: [],
     workPermit: { closeTime:'' },
-    steam: [],
+    steam: { fc2302sv: { day:{target:'',actual:''}, night:{target:'',actual:''} }, fc2602mv: { day:{target:'',actual:''}, night:{target:'',actual:''} } },
     naoh: {
       batch: { time:'', total:'', batchNo:'' },
       mlPd403: { time:'', units: [] },
@@ -734,6 +748,11 @@ async function loadDay(dateStr){
     startPm901: Object.assign({}, blank.naoh.startPm901, naohShape.startPm901),
     requestCta: Object.assign({}, blank.naoh.requestCta, naohShape.requestCta),
   };
+  const steamShape = (day.steam && !Array.isArray(day.steam)) ? day.steam : {};
+  day.steam = {
+    fc2302sv: { day: Object.assign({}, blank.steam.fc2302sv.day, steamShape.fc2302sv?.day), night: Object.assign({}, blank.steam.fc2302sv.night, steamShape.fc2302sv?.night) },
+    fc2602mv: { day: Object.assign({}, blank.steam.fc2602mv.day, steamShape.fc2602mv?.day), night: Object.assign({}, blank.steam.fc2602mv.night, steamShape.fc2602mv?.night) },
+  };
   return day;
 }
 function scheduleSave(){
@@ -766,12 +785,10 @@ async function seedSampleIfEmpty(){
     {id:uid(),sapNo:'100523118',detail:'ขัน G/P PJ-404 จุดรั่วซึม',status:'Not yet',remark:'ฝากกะเช้าติดตาม'},
   ];
   d.workPermit = { closeTime:'19:00' };
-  d.steam = [
-    {id:uid(),item:'FC-2302.SV',range:'07:30-19:30',target:'9.2',actual:'9.2'},
-    {id:uid(),item:'FC-2302.SV',range:'19:30-07:30',target:'9.2',actual:'9.2'},
-    {id:uid(),item:'FC-2602.MV',range:'07:30-19:30',target:'32',actual:'32'},
-    {id:uid(),item:'FC-2602.MV',range:'19:30-07:30',target:'34',actual:'34'},
-  ];
+  d.steam = {
+    fc2302sv: { day:{target:'9.2',actual:'9.2'}, night:{target:'9.2',actual:'9.2'} },
+    fc2602mv: { day:{target:'32',actual:'32'}, night:{target:'34',actual:'34'} },
+  };
   d.naoh = {
     batch: { time:'15:10', total:'30', batchNo:'1' },
     mlPd403: { time:'15:20', units:['A','D'] },
@@ -839,10 +856,10 @@ document.getElementById('segNight').addEventListener('click', ()=>{
 /* ================= Render: Overview ================= */
 function renderOverview(){
   document.getElementById('ov-totalProduct').value = currentDay.totalProduct;
-  document.getElementById('crew-day-fm').value = currentDay.crew.day.fm;
-  document.getElementById('crew-day-bm').value = currentDay.crew.day.bm;
-  document.getElementById('crew-night-fm').value = currentDay.crew.night.fm;
-  document.getElementById('crew-night-bm').value = currentDay.crew.night.bm;
+  document.getElementById('crew-day-fm').innerHTML = buildSelectOptions(CONFIG.fmRoster, currentDay.crew.day.fm);
+  document.getElementById('crew-day-bm').innerHTML = buildSelectOptions(CONFIG.bmRoster, currentDay.crew.day.bm);
+  document.getElementById('crew-night-fm').innerHTML = buildSelectOptions(CONFIG.fmRoster, currentDay.crew.night.fm);
+  document.getElementById('crew-night-bm').innerHTML = buildSelectOptions(CONFIG.bmRoster, currentDay.crew.night.bm);
   document.getElementById('dayCrewline').textContent = `F/M ${currentDay.crew.day.fm||'—'} · B/M ${currentDay.crew.day.bm||'—'}`;
   document.getElementById('nightCrewline').textContent = `F/M ${currentDay.crew.night.fm||'—'} · B/M ${currentDay.crew.night.bm||'—'}`;
 
@@ -924,7 +941,7 @@ document.getElementById('ov-totalProduct').addEventListener('input', e=>{
 });
 ['crew-day-fm','crew-day-bm','crew-night-fm','crew-night-bm'].forEach(id=>{
   document.getElementById(id).addEventListener('input', e=>{
-    const [,, shift, role] = id.split('-');
+    const [, shift, role] = id.split('-');
     currentDay.crew[shift][role] = e.target.value;
     document.getElementById('dayCrewline').textContent = `F/M ${currentDay.crew.day.fm||'—'} · B/M ${currentDay.crew.day.bm||'—'}`;
     document.getElementById('nightCrewline').textContent = `F/M ${currentDay.crew.night.fm||'—'} · B/M ${currentDay.crew.night.bm||'—'}`;
@@ -1260,7 +1277,7 @@ document.getElementById('addSiloRow').addEventListener('click', ()=>{
 function renderPlanLoading(){
   document.getElementById('planLoadingBody').innerHTML = CONFIG.tankKeys.map(k=>{
     const v = currentDay.planLoading[k] ?? '';
-    return `<tr data-tank="${k}"><td class="mono">${k}</td><td class="num"><input class="cell-input num tank-input" data-tank="${k}" value="${esc(v)}" placeholder="0"></td><td><div class="bar"><i style="width:0%"></i></div></td></tr>`;
+    return `<tr data-tank="${k}"><td class="mono">${k}</td><td class="num"><input class="cell-input num tank-input" data-tank="${k}" value="${esc(v)}" placeholder="0"></td><td><div class="bar"><i style="width:0%"></i></div><span class="bar-cap"></span></td></tr>`;
   }).join('');
   updatePlanLoadingBars();
   document.querySelectorAll('.tank-input').forEach(inp=>{
@@ -1272,23 +1289,98 @@ function renderPlanLoading(){
   });
 }
 function updatePlanLoadingBars(){
-  const maxVal = Math.max(1, ...CONFIG.tankKeys.map(k=>parseFloat(currentDay.planLoading[k])||0));
   CONFIG.tankKeys.forEach(k=>{
     const v = parseFloat(currentDay.planLoading[k])||0;
-    const pct = Math.min(100, Math.round((v/maxVal)*100));
+    const capacity = CONFIG.tankCapacity[k] || 1;
+    const pct = Math.max(0, Math.min(100, Math.round((v/capacity)*100)));
     const row = document.querySelector(`#planLoadingBody tr[data-tank="${k}"]`);
-    if(row){ const bar = row.querySelector('.bar i'); if(bar) bar.style.width = pct+'%'; }
+    if(!row) return;
+    const bar = row.querySelector('.bar i'); if(bar) bar.style.width = pct+'%';
+    const cap = row.querySelector('.bar-cap'); if(cap) cap.textContent = `${pct}% (${capacity} T)`;
   });
 }
 
 /* ================= SOP reminders ================= */
+function sopEntry(item){
+  let e = currentDay.sopDone[item.id];
+  if(!e || typeof e !== 'object'){
+    const wasDone = e === true;
+    e = { done: wasDone, time: '' };
+    if(item.extra==='liters') e.liters='';
+    if(item.extra==='unitsAB') e.units=[];
+    if(item.extra==='unitsAB+kg'){ e.units=[]; e.kg=''; }
+    if(item.extra==='lcv3') e.valves={'2301':{timer:'',open:''},'2302':{timer:'',open:''},'2303':{timer:'',open:''}};
+    currentDay.sopDone[item.id]=e;
+  }
+  return e;
+}
+function sopExtraHtml(item, e){
+  if(item.extra==='liters'){
+    return `<div class="sop-extra"><input class="cell-input num" data-sop="${item.id}" data-f="liters" value="${esc(e.liters)}" placeholder="0"> Lite</div>`;
+  }
+  if(item.extra==='unitsAB'){
+    return `<div class="sop-extra">@ PM-401 <span class="unit-group" data-sop="${item.id}" data-f="units">${['A','B'].map(u=>`<button class="unit-chip" data-val="${u}" aria-pressed="${e.units.includes(u)}">${u}</button>`).join('')}</span></div>`;
+  }
+  if(item.extra==='unitsAB+kg'){
+    return `<div class="sop-extra"><span class="unit-group" data-sop="${item.id}" data-f="units">${['A','B'].map(u=>`<button class="unit-chip" data-val="${u}" aria-pressed="${e.units.includes(u)}">${u}</button>`).join('')}</span> Have lump = <input class="cell-input num" data-sop="${item.id}" data-f="kg" value="${esc(e.kg)}" placeholder="0"> kg.</div>`;
+  }
+  if(item.extra==='lcv3'){
+    return `<div class="sop-extra"><div class="sop-lcv-group">${['2301','2302','2303'].map(v=>`<span class="sop-lcv-item">(${v}) timer <input class="cell-input num" data-sop="${item.id}" data-f="valve-${v}-timer" value="${esc(e.valves[v].timer)}" placeholder="0" style="width:44px"> sec, open <input class="cell-input num" data-sop="${item.id}" data-f="valve-${v}-open" value="${esc(e.valves[v].open)}" placeholder="0" style="width:44px"> %</span>`).join('')}</div></div>`;
+  }
+  return '';
+}
 function renderSop(){
   document.getElementById('sopList').innerHTML = CONFIG.sopReminders.map(item=>{
-    const done = !!currentDay.sopDone[item.id];
-    return `<li class="${done?'done':''}"><input type="checkbox" data-id="${item.id}" ${done?'checked':''}><span class="txt">${esc(item.txt)}</span><span class="freq">${esc(item.freq)}</span></li>`;
+    const e = sopEntry(item);
+    return `<li class="${e.done?'done':''}" data-sop="${item.id}">
+      <div class="sop-main">
+        <input type="checkbox" class="sop-check" data-sop="${item.id}" ${e.done?'checked':''}>
+        <input class="cell-input mono sop-time" data-sop="${item.id}" data-f="time" value="${esc(e.time)}" placeholder="00:00">
+        <span class="txt">${esc(item.txt)}</span>
+        <span class="freq">${esc(item.freq)}</span>
+      </div>
+      ${sopExtraHtml(item, e)}
+    </li>`;
   }).join('');
-  document.querySelectorAll('#sopList input[type=checkbox]').forEach(cb=>{
-    cb.addEventListener('change', ()=>{ currentDay.sopDone[cb.dataset.id]=cb.checked; scheduleSave(); renderSop(); });
+
+  document.querySelectorAll('.sop-check').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      const e = currentDay.sopDone[cb.dataset.sop];
+      e.done = cb.checked;
+      scheduleSave();
+      cb.closest('li').classList.toggle('done', e.done);
+    });
+  });
+  document.querySelectorAll('.sop-time').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      currentDay.sopDone[inp.dataset.sop].time = inp.value;
+      scheduleSave();
+    });
+  });
+  document.querySelectorAll('.sop-extra input.cell-input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const e = currentDay.sopDone[inp.dataset.sop];
+      const f = inp.dataset.f;
+      if(f==='liters') e.liters = inp.value;
+      else if(f==='kg') e.kg = inp.value;
+      else if(f.startsWith('valve-')){
+        const [,v,field] = f.split('-');
+        e.valves[v][field] = inp.value;
+      }
+      scheduleSave();
+    });
+  });
+  document.querySelectorAll('.sop-extra .unit-group').forEach(group=>{
+    group.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const e = currentDay.sopDone[group.dataset.sop];
+        const val = btn.dataset.val;
+        const idx = e.units.indexOf(val);
+        if(idx>=0) e.units.splice(idx,1); else e.units.push(val);
+        scheduleSave();
+        btn.setAttribute('aria-pressed', idx>=0?'false':'true');
+      });
+    });
   });
 }
 
@@ -1338,34 +1430,27 @@ document.getElementById('wp-closeTime').addEventListener('input', e=>{ currentDa
 
 /* ================= Steam tracking ================= */
 function renderSteam(){
-  const rows = currentDay.steam;
-  document.getElementById('steamTableBody').innerHTML = rows.map(r=>`
-    <tr data-id="${r.id}">
-      <td><input class="cell-input steam-f mono" data-f="item" value="${esc(r.item)}" placeholder="Item"></td>
-      <td><input class="cell-input steam-f mono" data-f="range" value="${esc(r.range)}" placeholder="07:30-19:30"></td>
-      <td class="num"><input class="cell-input num steam-f" data-f="target" value="${esc(r.target)}" placeholder="0"></td>
-      <td class="num"><input class="cell-input num steam-f" data-f="actual" value="${esc(r.actual)}" placeholder="0"></td>
-      <td><button class="rowdel steam-del">🗑️</button></td>
-    </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">ยังไม่มีรายการวัด</td></tr>';
-  document.querySelectorAll('.steam-f').forEach(inp=>{
-    inp.addEventListener('input', ()=>{
-      const id = inp.closest('tr').dataset.id;
-      const row = currentDay.steam.find(r=>r.id===id);
-      row[inp.dataset.f] = inp.value; scheduleSave();
+  let html = '';
+  CONFIG.steamItems.forEach(item=>{
+    item.ranges.forEach((r, i)=>{
+      const cell = currentDay.steam[item.key][r.key];
+      html += `<tr data-item="${item.key}" data-shift="${r.key}">
+        <td class="mono">${i===0 ? esc(item.item) : ''}</td>
+        <td class="mono">${esc(r.range)}</td>
+        <td class="num"><input class="cell-input num steam-f" data-f="target" value="${esc(cell.target)}" placeholder="0"></td>
+        <td class="num"><input class="cell-input num steam-f" data-f="actual" value="${esc(cell.actual)}" placeholder="0"></td>
+      </tr>`;
     });
   });
-  document.querySelectorAll('.steam-del').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const id = btn.closest('tr').dataset.id;
-      currentDay.steam = currentDay.steam.filter(r=>r.id!==id);
-      scheduleSave(); renderSteam();
+  document.getElementById('steamTableBody').innerHTML = html;
+  document.querySelectorAll('.steam-f').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const tr = inp.closest('tr');
+      currentDay.steam[tr.dataset.item][tr.dataset.shift][inp.dataset.f] = inp.value;
+      scheduleSave();
     });
   });
 }
-document.getElementById('addSteamRow').addEventListener('click', ()=>{
-  currentDay.steam.push({id:uid(),item:'',range:'',target:'',actual:''});
-  scheduleSave(); renderSteam();
-});
 
 /* ================= NaOH checklist ================= */
 function naohGet(path){ const [a,b]=path.split('.'); return currentDay.naoh[a][b]; }
@@ -1455,7 +1540,7 @@ function renderNaoh(){
   bindTimeField('naoh-pm901wash-time', 'pm901wash.time');
   bindTimeField('naoh-startpm901-time', 'startPm901.time');
 
-  document.querySelectorAll('.unit-group.batch-no-group').forEach(group=>{
+  document.querySelectorAll('#naohChecklist .unit-group.batch-no-group').forEach(group=>{
     group.querySelectorAll('button').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         naohSet('batch.batchNo', btn.dataset.val);
@@ -1465,7 +1550,7 @@ function renderNaoh(){
     });
   });
 
-  document.querySelectorAll('.unit-group:not(.batch-no-group)').forEach(group=>{
+  document.querySelectorAll('#naohChecklist .unit-group:not(.batch-no-group)').forEach(group=>{
     const [a,b] = group.dataset.target.split('.');
     group.querySelectorAll('button').forEach(btn=>{
       btn.addEventListener('click', ()=>{
@@ -1802,8 +1887,9 @@ function renderAll(){
   renderAll();
 
   wireComposer(document.querySelector('.composer[data-section="dailyWork"]'), (entry)=>{
-    const hh = parseInt(entry.time.split(':')[0],10);
-    const shift = (hh>=8 && hh<20) ? 'day' : 'night';
+    const [hh, mm] = entry.time.split(':').map(n=>parseInt(n,10));
+    const mins = hh*60 + (mm||0);
+    const shift = (mins>=450 && mins<1170) ? 'day' : 'night'; // 07:30–19:30 = day
     currentDay.dailyWork.push(Object.assign({id:uid(),shift,author:'คุณ'}, entry));
     saveNow(); renderDailyWork(); renderOverview();
     toast('บันทึกลง '+(shift==='day'?'กะเช้า ☀️':'กะดึก 🌙')+' แล้ว');
