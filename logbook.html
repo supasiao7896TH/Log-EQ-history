@@ -275,6 +275,7 @@ select.chip-select.neutral{background:var(--panel2);color:var(--muted);border-co
 .hist-item mark{background:var(--amber-soft);color:var(--amber);border-radius:3px;padding:0 2px}
 .hist-item.red-item{border-left:3px solid var(--red)}
 .hist-item.red-item .htxt{color:var(--red);font-weight:600}
+.hist-item.sap-hist-item{flex-wrap:wrap;row-gap:4px}
 .no-result{color:var(--muted);font-size:13.5px;text-align:center;padding:24px}
 
 /* ---------- Modal (settings) ---------- */
@@ -533,7 +534,7 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 40px;color:var(--muted);fon
     <h2>งาน SAP / MT / Memo</h2>
     <div class="scroll-x">
       <table>
-        <thead><tr><th>SAP No.</th><th>รายละเอียด</th><th>สถานะ</th><th>Remark</th><th></th></tr></thead>
+        <thead><tr><th>SAP No.</th><th>ผู้แจ้ง SAP</th><th>รายละเอียด</th><th>หน่วยงานซ่อม</th><th>สถานะ</th><th>Remark</th><th></th></tr></thead>
         <tbody id="sapTableBody"></tbody>
       </table>
     </div>
@@ -543,6 +544,18 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 40px;color:var(--muted);fon
     <div class="card"><div class="stat"><span class="label">Work Permit ทั้งหมด</span><span class="value"><input class="cell-input num" id="wp-total" style="font-size:24px" placeholder="0"></span></div></div>
     <div class="card"><div class="stat"><span class="label">ปิด Work</span><span class="value"><input class="cell-input num" id="wp-closed" style="font-size:24px" placeholder="0"></span></div></div>
     <div class="card"><div class="stat"><span class="label">คงเหลือ Work</span><span class="value" id="wp-remain">0</span></div></div>
+  </div>
+  <div class="card section-gap">
+    <h2>ค้นหางาน SAP ย้อนหลัง <span class="hint">ค้นหาทุกวันที่บันทึกไว้</span></h2>
+    <div class="searchbar">
+      <input id="sapHistSearch" type="search" placeholder="ค้นหา SAP No., รายละเอียด, Remark, ผู้แจ้ง…">
+    </div>
+    <div class="filter-chips" id="sapHistChips">
+      <button class="chip" data-dept="IE">IE</button>
+      <button class="chip" data-dept="EE">EE</button>
+      <button class="chip" data-dept="ME">ME</button>
+    </div>
+    <div id="sapHistResults"></div>
   </div>
 </section>
 
@@ -856,6 +869,7 @@ document.querySelectorAll('.tabs [role=tab]').forEach(btn=>{
     document.querySelectorAll('.tabpane').forEach(p=>p.classList.remove('active'));
     document.getElementById('pane-'+btn.dataset.tab).classList.add('active');
     if(btn.dataset.tab==='history') renderHistory();
+    if(btn.dataset.tab==='sap') renderSapSearch();
     if(btn.dataset.tab==='silo') refreshSopDueHighlights(true);
     window.scrollTo({top:0});
   });
@@ -1568,7 +1582,9 @@ function renderSap(){
   document.getElementById('sapTableBody').innerHTML = rows.map(r=>`
     <tr data-id="${esc(r.id)}">
       <td><input class="cell-input sap-f mono" data-f="sapNo" value="${esc(r.sapNo)}" placeholder="SAP No."></td>
+      <td><input class="cell-input sap-f" data-f="reporter" value="${esc(r.reporter||'')}" placeholder="ผู้แจ้ง"></td>
       <td><input class="cell-input sap-f" data-f="detail" value="${esc(r.detail)}" placeholder="รายละเอียด"></td>
+      <td><select class="cell-input sap-f" data-f="dept" style="padding-right:2px">${buildSelectOptions(['IE','EE','ME'], r.dept||'')}</select></td>
       <td><select class="cell-input sap-f" data-f="status" style="padding-right:2px">
         <option value="Not yet" ${r.status==='Not yet'?'selected':''}>Not yet</option>
         <option value="REL" ${r.status==='REL'?'selected':''}>REL</option>
@@ -1576,7 +1592,7 @@ function renderSap(){
       </select></td>
       <td><input class="cell-input sap-f" data-f="remark" value="${esc(r.remark)}" placeholder="Remark"></td>
       <td><button class="rowdel sap-del">🗑️</button></td>
-    </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted)">ยังไม่มีงาน SAP</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted)">ยังไม่มีงาน SAP</td></tr>';
   document.querySelectorAll('.sap-f').forEach(inp=>{
     inp.addEventListener('input', ()=>{
       const id = inp.closest('tr').dataset.id;
@@ -1603,11 +1619,73 @@ function updateWorkPermitRemain(){
   document.getElementById('wp-remain').textContent = total - closed;
 }
 document.getElementById('addSapRow').addEventListener('click', ()=>{
-  currentDay.sap.push({id:uid(),sapNo:'',detail:'',status:'Not yet',remark:''});
+  currentDay.sap.push({id:uid(),sapNo:'',reporter:'',detail:'',dept:'',status:'Not yet',remark:''});
   scheduleSave(); renderSap();
 });
 document.getElementById('wp-total').addEventListener('input', e=>{ currentDay.workPermit.total=e.target.value; scheduleSave(); updateWorkPermitRemain(); });
 document.getElementById('wp-closed').addEventListener('input', e=>{ currentDay.workPermit.closed=e.target.value; scheduleSave(); updateWorkPermitRemain(); });
+
+/* ================= SAP history search ================= */
+let sapHistCache = [];
+let sapHistActiveDept = '';
+async function renderSapSearch(){
+  const entries = await dbManager.allEntries();
+  const idx = entries.findIndex(e=>e[0]===currentDate);
+  if(idx>=0) entries[idx][1] = currentDay; else entries.push([currentDate, currentDay]);
+  sapHistCache = entries.sort((a,b)=>b[0].localeCompare(a[0]));
+  document.querySelectorAll('#sapHistChips .chip').forEach(btn=>{
+    btn.onclick = ()=>{
+      const on = btn.getAttribute('aria-pressed')!=='true';
+      document.querySelectorAll('#sapHistChips .chip').forEach(b=>b.setAttribute('aria-pressed','false'));
+      btn.setAttribute('aria-pressed', on?'true':'false');
+      sapHistActiveDept = on ? btn.dataset.dept : '';
+      doFilter();
+    };
+  });
+  const searchInput = document.getElementById('sapHistSearch');
+  searchInput.oninput = doFilter;
+  function doFilter(){ filterSapSearch(searchInput.value.trim(), sapHistActiveDept); }
+  doFilter();
+}
+function filterSapSearch(q, dept){
+  const box = document.getElementById('sapHistResults');
+  box.innerHTML=''; let total=0;
+  const qLower=q.toLowerCase();
+  sapHistCache.forEach(([dateStr,day])=>{
+    const hits=(day.sap||[]).filter(r=>{
+      const okDept = !dept || (r.dept||'')===dept;
+      const hay=[r.sapNo,r.detail,r.remark,r.reporter].map(v=>(v||'').toLowerCase()).join(' ');
+      const okQ = !q || hay.indexOf(qLower)>=0;
+      return okDept && okQ;
+    });
+    if(!hits.length) return;
+    total+=hits.length;
+    const sec=document.createElement('div'); sec.className='hist-day';
+    sec.innerHTML = `<h3>📅 ${esc(dateStr)} <span class="cnt">(${hits.length} รายการ)</span> <button data-date="${esc(dateStr)}">ไปที่วันนี้ →</button></h3>`;
+    sec.querySelector('button').addEventListener('click', ()=>{ goToDate(dateStr); });
+    const mark = s=>{
+      if(!q || !s) return esc(s||'');
+      const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+      return esc(s).replace(re,'<mark>$1</mark>');
+    };
+    hits.forEach(r=>{
+      const div=document.createElement('div');
+      div.className='hist-item sap-hist-item';
+      div.innerHTML = `
+        <span class="ht">${mark(r.sapNo)}</span>
+        <span class="chip">${esc(r.status||'Not yet')}</span>
+        ${r.dept?`<span class="chip">${esc(r.dept)}</span>`:''}
+        <span class="htxt">${mark(r.detail)}</span>
+        ${r.reporter?`<span class="htxt" style="color:var(--muted)">👤 ${mark(r.reporter)}</span>`:''}
+        ${r.remark?`<span class="htxt" style="color:var(--muted)">📝 ${mark(r.remark)}</span>`:''}
+      `;
+      div.addEventListener('click', ()=>{ goToDate(dateStr); });
+      sec.appendChild(div);
+    });
+    box.appendChild(sec);
+  });
+  if(!total) box.innerHTML = `<p class="no-result">ไม่พบรายการที่ตรงกับ "${esc(q||dept)}"</p>`;
+}
 
 /* ================= Steam tracking ================= */
 function renderSteam(){
