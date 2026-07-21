@@ -632,6 +632,8 @@ const CONFIG = {
     {key:'fc2602mv', item:'FC2602.MV', ranges:[{key:'day', range:'07:30-19:30'},{key:'night', range:'19:30-07:30'}]},
   ],
 };
+const KPI_TARGET_DEFAULTS = CONFIG.kpiItems.reduce((m,i)=>{ m[i.key]=i.target; return m; }, {});
+const KPI_TARGETS_LS_KEY = 'logbook_kpiTargets';
 
 /* ================= IndexedDB wrapper ================= */
 const dbManager = {
@@ -693,12 +695,34 @@ function parseTargetRange(str){
   m=str.match(/^[>≥]\s*([\d.]+)$/); if(m) return {min:parseFloat(m[1]),max:Infinity};
   return null;
 }
+function isValidTargetStr(str){
+  return str==='' || parseTargetRange(str)!==null;
+}
 function kpiStatus(value, targetStr){
   if(value===''||value==null||isNaN(parseFloat(value))) return null;
   const range=parseTargetRange(targetStr);
   if(!range) return 'ok';
   const v=parseFloat(value);
   return (v>=range.min && v<=range.max) ? 'ok' : 'warn';
+}
+function applyKpiTargetOverrides(){
+  let saved;
+  try{ saved = JSON.parse(localStorage.getItem(KPI_TARGETS_LS_KEY) || '{}'); }
+  catch(e){ console.warn('logbook_kpiTargets: corrupted JSON, ignoring', e); saved = {}; }
+  if(!saved || typeof saved!=='object') saved = {};
+  CONFIG.kpiItems.forEach(item=>{
+    const v = saved[item.key];
+    if(typeof v==='string' && isValidTargetStr(v)) item.target = v;
+  });
+}
+function saveKpiTargetOverride(key, value){
+  let saved;
+  try{ saved = JSON.parse(localStorage.getItem(KPI_TARGETS_LS_KEY) || '{}'); }
+  catch(e){ saved = {}; }
+  if(!saved || typeof saved!=='object') saved = {};
+  if(value === KPI_TARGET_DEFAULTS[key]) delete saved[key];
+  else saved[key] = value;
+  localStorage.setItem(KPI_TARGETS_LS_KEY, JSON.stringify(saved));
 }
 
 /* ================= Auto-parse (EQ tag / time / type) ================= */
@@ -899,7 +923,7 @@ function renderKpiTable(){
     const dSt = kpiStatus(dv,item.target), nSt = kpiStatus(nv,item.target);
     return `<tr data-kpi="${item.key}">
       <td>${item.label}</td>
-      <td class="mono" style="color:var(--muted)">${item.target||'—'}</td>
+      <td><input class="cell-input mono kpi-target-input" data-key="${item.key}" value="${esc(item.target)}" placeholder="—"></td>
       <td class="num"><input class="cell-input num kpi-input ${dSt==='warn'?'kpi-flag':''}" data-key="${item.key}" data-shift="day" value="${esc(dv)}" placeholder="—"></td>
       <td class="num"><input class="cell-input num kpi-input ${nSt==='warn'?'kpi-flag':''}" data-key="${item.key}" data-shift="night" value="${esc(nv)}" placeholder="—"></td>
       <td class="kpi-status-cell">${kpiStatusChipHtml(dSt,nSt)}</td>
@@ -911,6 +935,25 @@ function renderKpiTable(){
       scheduleSave();
       updateKpiRow(inp.dataset.key);
     });
+  });
+  document.querySelectorAll('.kpi-target-input').forEach(inp=>{
+    const commit = ()=>{
+      const key = inp.dataset.key;
+      const item = CONFIG.kpiItems.find(i=>i.key===key);
+      const newVal = inp.value.trim();
+      if(newVal===item.target){ inp.value=item.target; return; }
+      if(!isValidTargetStr(newVal)){
+        toast('รูปแบบ target ไม่ถูกต้อง เช่น 0-15, 87+, >68.5 หรือเว้นว่างไว้');
+        inp.value = item.target;
+        return;
+      }
+      item.target = newVal;
+      inp.value = newVal;
+      saveKpiTargetOverride(key, newVal);
+      updateKpiRow(key);
+    };
+    inp.addEventListener('change', commit);
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); inp.blur(); } });
   });
 }
 function updateKpiRow(key){
@@ -1931,6 +1974,7 @@ function renderAll(){
 
 /* ================= Init ================= */
 (async function init(){
+  applyKpiTargetOverrides();
   await dbManager.init();
   await seedSampleIfEmpty();
   if(!localStorage.getItem('logbook_lastDate')){
