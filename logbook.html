@@ -536,9 +536,9 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 40px;color:var(--muted);fon
     <button class="addrow" id="addSapRow">+ เพิ่มงาน SAP</button>
   </div>
   <div class="grid g3 section-gap">
-    <div class="card"><div class="stat"><span class="label">Work Permit ทั้งหมด</span><span class="value" id="wp-total">0</span></div></div>
-    <div class="card"><div class="stat"><span class="label">คงเหลือ (Remain)</span><span class="value" id="wp-remain">0</span></div></div>
-    <div class="card"><div class="stat"><span class="label">ปิด Permit ล่าสุด</span><span class="value"><input class="cell-input" id="wp-closeTime" placeholder="19:00" style="font-size:20px;width:90px"></span></div></div>
+    <div class="card"><div class="stat"><span class="label">Work Permit ทั้งหมด</span><span class="value"><input class="cell-input num" id="wp-total" style="font-size:24px" placeholder="0"></span></div></div>
+    <div class="card"><div class="stat"><span class="label">ปิด Work</span><span class="value"><input class="cell-input num" id="wp-closed" style="font-size:24px" placeholder="0"></span></div></div>
+    <div class="card"><div class="stat"><span class="label">คงเหลือ Work</span><span class="value" id="wp-remain">0</span></div></div>
   </div>
 </section>
 
@@ -668,7 +668,7 @@ function emptyDay(dateStr){
     qualityPanel: { cta4cba:'', ctaT340:'', recovM:'', recovN:'' },
     safety: { 1:'ok', 2:'ok', 3:'ok', 4:'ok', 5:'ok' },
     alarms: {}, silo: [], planLoading: {}, sap: [],
-    workPermit: { closeTime:'' },
+    workPermit: { total:'', closed:'' },
     steam: { fc2302sv: { day:{target:'',actual:''}, night:{target:'',actual:''} }, fc2602mv: { day:{target:'',actual:''}, night:{target:'',actual:''} } },
     naoh: {
       batch: { time:'', total:'', batchNo:'' },
@@ -1472,30 +1472,33 @@ function renderSap(){
     inp.addEventListener('input', ()=>{
       const id = inp.closest('tr').dataset.id;
       const row = currentDay.sap.find(r=>r.id===id);
-      row[inp.dataset.f] = inp.value; scheduleSave(); renderWorkPermitStats();
+      row[inp.dataset.f] = inp.value; scheduleSave();
     });
   });
   document.querySelectorAll('.sap-del').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const id = btn.closest('tr').dataset.id;
       currentDay.sap = currentDay.sap.filter(r=>r.id!==id);
-      scheduleSave(); renderSap(); renderWorkPermitStats();
+      scheduleSave(); renderSap();
     });
   });
-  renderWorkPermitStats();
 }
 function renderWorkPermitStats(){
-  const total = currentDay.sap.length;
-  const remain = currentDay.sap.filter(r=>r.status!=='Completed').length;
-  document.getElementById('wp-total').textContent = total;
-  document.getElementById('wp-remain').textContent = remain;
-  document.getElementById('wp-closeTime').value = currentDay.workPermit.closeTime;
+  document.getElementById('wp-total').value = currentDay.workPermit.total;
+  document.getElementById('wp-closed').value = currentDay.workPermit.closed;
+  updateWorkPermitRemain();
+}
+function updateWorkPermitRemain(){
+  const total = parseFloat(currentDay.workPermit.total) || 0;
+  const closed = parseFloat(currentDay.workPermit.closed) || 0;
+  document.getElementById('wp-remain').textContent = total - closed;
 }
 document.getElementById('addSapRow').addEventListener('click', ()=>{
   currentDay.sap.push({id:uid(),sapNo:'',detail:'',status:'Not yet',remark:''});
   scheduleSave(); renderSap();
 });
-document.getElementById('wp-closeTime').addEventListener('input', e=>{ currentDay.workPermit.closeTime=e.target.value; scheduleSave(); });
+document.getElementById('wp-total').addEventListener('input', e=>{ currentDay.workPermit.total=e.target.value; scheduleSave(); updateWorkPermitRemain(); });
+document.getElementById('wp-closed').addEventListener('input', e=>{ currentDay.workPermit.closed=e.target.value; scheduleSave(); updateWorkPermitRemain(); });
 
 /* ================= Steam tracking ================= */
 function renderSteam(){
@@ -1969,6 +1972,7 @@ function renderAll(){
   renderPlanLoading();
   renderSop();
   renderSap();
+  renderWorkPermitStats();
   renderSteam();
   renderNaoh();
 }
