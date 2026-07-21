@@ -1100,6 +1100,13 @@ function entryTimeKey(e){
   if(e.shift==='night' && mins<450) mins += 1440;
   return mins;
 }
+function timeSortKey(timeStr){
+  const m = /^(\d{1,2}):(\d{2})/.exec(timeStr||'');
+  if(!m) return 0;
+  let mins = parseInt(m[1],10)*60 + parseInt(m[2],10);
+  if(mins<450) mins += 1440; // 00:00–07:29 คือช่วงท้ายของกะดึกที่คร่อมเที่ยงคืน ต้องเรียงต่อจาก 19:30 ไม่ใช่ขึ้นก่อน
+  return mins;
+}
 function statusClass(status){ return status==='ปิดงานแล้ว'?'ok':(status==='เฝ้าระวัง'?'warn':'bad'); }
 function entryCardHtml(e, sectionKey){
   const tagsHtml = (e.tags||[]).map(t=>`<span class="chip tagchip">${esc(t)}</span>`).join('');
@@ -1133,7 +1140,7 @@ function renderDailyWork(){
   wireEntryButtons();
 }
 function renderQualityLog(){
-  const list = currentDay.qualityLog.slice().sort((a,b)=>a.time.localeCompare(b.time));
+  const list = currentDay.qualityLog.slice().sort((a,b)=>timeSortKey(a.time)-timeSortKey(b.time));
   document.getElementById('qualityTimeline').innerHTML = list.length ? list.map(e=>entryCardHtml(e,'qualityLog')).join('') : '<p class="empty-hint">ยังไม่มีบันทึก Quality Control วันนี้</p>';
   wireEntryButtons();
 }
@@ -1635,7 +1642,7 @@ function filterHistory(q, chipQuery){
       const okChip = !chipQuery || (chipQuery==='⭐' ? it.important : it.tags.some(t=>t.toUpperCase()===chipQuery.toUpperCase()) || it.text.toUpperCase().indexOf(chipQuery.toUpperCase())>=0);
       const okQ = !q || it.text.toLowerCase().indexOf(qLower)>=0 || it.time.indexOf(q)>=0;
       return okChip && okQ;
-    }).sort((a,b)=>a.time.localeCompare(b.time));
+    }).sort((a,b)=>timeSortKey(a.time)-timeSortKey(b.time));
     if(!hits.length) return;
     total+=hits.length;
     const sec=document.createElement('div'); sec.className='hist-day';
@@ -1832,6 +1839,10 @@ function sanitizeImportedDay(day){
     day[sec] = day[sec].filter(e=>e && typeof e==='object');
     day[sec].forEach(e=>{
       if(typeof e.id!=='string' || !/^[a-z0-9]+$/i.test(e.id)) e.id=uid();
+      if(typeof e.text!=='string') e.text='';
+      if(typeof e.time!=='string' || !/^\d{1,2}:\d{2}/.test(e.time)) e.time='00:00';
+      if(e.type!=null && typeof e.type!=='string') e.type=null;
+      if(e.status!=null && typeof e.status!=='string') e.status=undefined;
       e.tags = Array.isArray(e.tags) ? e.tags.filter(t=>typeof t==='string') : [];
       e.photos = Array.isArray(e.photos) ? e.photos.filter(p=>typeof p==='string' && p.startsWith('data:image/')) : [];
     });
@@ -1853,6 +1864,7 @@ document.getElementById('importFileInput').addEventListener('change', function()
       const keys=Object.keys(data).filter(k=>/^\d{4}-\d{2}-\d{2}$/.test(k) && data[k] && typeof data[k]==='object' && !Array.isArray(data[k]));
       if(!keys.length) throw new Error('ไม่พบข้อมูลรายวันในไฟล์');
       if(!confirm(`นำเข้าข้อมูล ${keys.length} วัน? วันที่ซ้ำกับที่มีอยู่จะถูกเขียนทับ`)) return;
+      clearTimeout(saveTimer); saveTimer=null; // กัน debounce autosave เดิมค้างเขียนทับข้อมูลที่เพิ่ง import เข้ามา
       for(const k of keys){ await dbManager.set(k, sanitizeImportedDay(data[k])); }
       toast('นำเข้าข้อมูลสำเร็จ!');
       closeSettingsModal();
