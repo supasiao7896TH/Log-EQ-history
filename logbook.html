@@ -231,6 +231,10 @@ select.chip-select.neutral{background:var(--panel2);color:var(--muted);border-co
 .sop-main input[type=checkbox]{margin-top:3px;flex:none;accent-color:var(--accent);width:15px;height:15px}
 .sop li.done .sop-main .txt{opacity:.5;text-decoration:line-through}
 .sop .freq{font-size:11px;background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:0 6px;white-space:nowrap;margin-left:auto}
+.sop li.sop-due .sop-main .txt{color:var(--ink);font-weight:600}
+.sop li.sop-overdue .sop-main .txt{color:var(--red);font-weight:600}
+.sop-due-badge-row{margin-top:4px}
+.sop-due-badge-row .chip{font-weight:600}
 .sop .txt{flex:1}
 .sop-time{width:56px;text-align:center;flex:none}
 .sop-extra{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0 2px 24px;font-size:12.5px}
@@ -852,6 +856,7 @@ document.querySelectorAll('.tabs [role=tab]').forEach(btn=>{
     document.querySelectorAll('.tabpane').forEach(p=>p.classList.remove('active'));
     document.getElementById('pane-'+btn.dataset.tab).classList.add('active');
     if(btn.dataset.tab==='history') renderHistory();
+    if(btn.dataset.tab==='silo') refreshSopDueHighlights(true);
     window.scrollTo({top:0});
   });
 });
@@ -867,6 +872,7 @@ async function goToDate(dateStr){
   dateInput.value = dateStr;
   currentDay = await loadDay(dateStr);
   renderAll();
+  refreshSopDueHighlights(false);
 }
 dateInput.addEventListener('change', ()=>goToDate(dateInput.value));
 document.getElementById('prevDayBtn').addEventListener('click', ()=>goToDate(shiftDate(currentDate,-1)));
@@ -1418,6 +1424,7 @@ function renderSop(){
       e.done = cb.checked;
       scheduleSave();
       cb.closest('li').classList.toggle('done', e.done);
+      reapplySopDueHighlightsSync();
     });
   });
   document.querySelectorAll('.sop-time').forEach(inp=>{
@@ -1451,6 +1458,108 @@ function renderSop(){
       });
     });
   });
+  reapplySopDueHighlightsSync();
+}
+
+/* ================= SOP due/overdue highlighting ================= */
+const SOP_WEEKDAYS = {'อาทิตย์':0,'จันทร์':1,'อังคาร':2,'พุธ':3,'พฤหัสบดี':4,'ศุกร์':5,'เสาร์':6};
+const SOP_DOW_ALT = Object.keys(SOP_WEEKDAYS).join('|');
+const SOP_DOW_RE = new RegExp('^(?:ทุกวัน)?(?:'+SOP_DOW_ALT+')(?:\\s*/\\s*(?:'+SOP_DOW_ALT+'))*$');
+const SOP_LOOKBACK_DAYS = 40; // worst-case monthly gap (e.g. a day-30 schedule skipping Feb) is ~31 days; 40 gives margin
+
+function parseSopSchedule(freq){
+  if(!freq) return null;
+  const f = freq.trim();
+  const dom = f.match(/^ทุกวันที่\s*([\d\s,]+)$/);
+  if(dom){
+    const days = dom[1].split(',').map(s=>parseInt(s.trim(),10)).filter(n=>!isNaN(n) && n>=1 && n<=31);
+    return days.length ? { type:'dom', days } : null;
+  }
+  if(SOP_DOW_RE.test(f)){
+    const days = f.replace(/^ทุกวัน/,'').split('/').map(s=>SOP_WEEKDAYS[s.trim()]).filter(d=>d!==undefined);
+    return days.length ? { type:'dow', days } : null;
+  }
+  return null; // not date-schedulable (e.g. sop8's 'Foloow up exa. Alarm') — never highlighted
+}
+function sopScheduleMatches(schedule, dateStr){
+  const d = new Date(dateStr+'T00:00:00');
+  return schedule.type==='dow' ? schedule.days.includes(d.getDay()) : schedule.days.includes(d.getDate());
+}
+function lastSopOccurrence(schedule, dateStr){
+  const d = new Date(dateStr+'T00:00:00');
+  for(let i=0;i<SOP_LOOKBACK_DAYS;i++){
+    const ds = todayStr(d);
+    if(sopScheduleMatches(schedule, ds)) return ds;
+    d.setDate(d.getDate()-1);
+  }
+  return null;
+}
+function isSopItemDoneOnDate(historyMap, dateStr, itemId){
+  const sopDone = (dateStr===currentDate) ? currentDay.sopDone : historyMap.get(dateStr);
+  const e = sopDone && sopDone[itemId];
+  if(!e) return false;
+  return (typeof e==='object') ? !!e.done : e===true; // e===true covers legacy pre-object boolean records
+}
+function computeSopDueStatus(historyMap, dateStr){
+  const result = new Map(); // itemId -> 'today' | 'overdue' | null
+  CONFIG.sopReminders.forEach(item=>{
+    const schedule = parseSopSchedule(item.freq);
+    if(!schedule) return result.set(item.id, null);
+    const occurrence = lastSopOccurrence(schedule, dateStr);
+    if(!occurrence) return result.set(item.id, null);
+    let done = false;
+    const d = new Date(occurrence+'T00:00:00');
+    const end = new Date(dateStr+'T00:00:00');
+    while(d<=end){
+      if(isSopItemDoneOnDate(historyMap, todayStr(d), item.id)){ done=true; break; }
+      d.setDate(d.getDate()+1);
+    }
+    result.set(item.id, done ? null : (occurrence===dateStr ? 'today' : 'overdue'));
+  });
+  return result;
+}
+function applySopDueHighlights(historyMap, dateStr){
+  const dueMap = computeSopDueStatus(historyMap, dateStr);
+  let dueCount=0, overdueCount=0;
+  document.querySelectorAll('#sopList li[data-sop]').forEach(li=>{
+    const oldBadgeRow = li.querySelector('.sop-due-badge-row');
+    if(oldBadgeRow) oldBadgeRow.remove();
+    li.classList.remove('sop-due','sop-overdue');
+    const status = dueMap.get(li.dataset.sop);
+    if(!status) return;
+    li.classList.add(status==='today' ? 'sop-due' : 'sop-overdue');
+    const label = status==='today' ? '🔔 ถึงกำหนดวันนี้' : '⚠️ ค้างทำ';
+    li.querySelector('.sop-main').insertAdjacentHTML('afterend',
+      `<div class="sop-due-badge-row"><span class="chip warn sop-due-badge">${label}</span></div>`);
+    if(status==='today') dueCount++; else overdueCount++;
+  });
+  return {dueCount, overdueCount};
+}
+
+let sopHistoryMap = null; // Map<dateStr, sopDoneObj> snapshot, refreshed on Silo-tab visits & date nav
+let sopDueToken = 0;      // discards out-of-order async resolutions
+async function refreshSopDueHighlights(showToast){
+  const token = ++sopDueToken;
+  let entries;
+  try{ entries = await dbManager.allEntries(); }
+  catch(err){ console.warn('refreshSopDueHighlights: allEntries failed', err); return; }
+  if(token !== sopDueToken) return; // a newer refresh started meanwhile — discard this stale result
+  const map = new Map();
+  entries.forEach(([dateStr, day])=>{ if(day && day.sopDone) map.set(dateStr, day.sopDone); });
+  sopHistoryMap = map;
+  const {dueCount, overdueCount} = applySopDueHighlights(map, currentDate);
+  if(showToast) toastSopDueSummary(dueCount, overdueCount);
+}
+function reapplySopDueHighlightsSync(){
+  if(!sopHistoryMap) return; // no snapshot fetched yet this session; badges appear once refreshSopDueHighlights() first resolves
+  applySopDueHighlights(sopHistoryMap, currentDate);
+}
+function toastSopDueSummary(dueCount, overdueCount){
+  const total = dueCount+overdueCount;
+  if(total===0) return;
+  if(overdueCount===0) toast(`🔔 มีรายการ Regular work ถึงกำหนดวันนี้ ${dueCount} รายการ`);
+  else if(dueCount===0) toast(`⚠️ มีรายการ Regular work ค้างทำ ${overdueCount} รายการ`);
+  else toast(`⚠️ ถึงกำหนด ${dueCount} + ค้างทำ ${overdueCount} รายการ (Regular work)`);
 }
 
 /* ================= SAP table ================= */
@@ -1917,6 +2026,7 @@ document.getElementById('importFileInput').addEventListener('change', function()
       closeSettingsModal();
       currentDay = await loadDay(currentDate);
       renderAll();
+      refreshSopDueHighlights(false);
     }catch(err){ toast('ไฟล์ไม่ถูกต้อง: '+err.message); }
     finally{ this.value=''; }
   };
