@@ -130,6 +130,7 @@ td.num,th.num{text-align:right;font-family:"Cascadia Mono",Consolas,ui-monospace
 /* ---------- Stats ---------- */
 .stat{display:flex;flex-direction:column;gap:2px}
 .stat .label{font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.stat .label.title{font-size:14.5px;text-transform:none;letter-spacing:normal;font-weight:700;color:var(--ink)}
 .stat .value{font-size:24px;font-weight:700;font-family:"Cascadia Mono",Consolas,ui-monospace,monospace;font-variant-numeric:tabular-nums}
 .stat .value small{font-size:12px;color:var(--muted);font-weight:400;font-family:"Leelawadee UI","Segoe UI",sans-serif}
 .bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px}
@@ -356,14 +357,14 @@ footer{max-width:1080px;margin:0 auto;padding:0 16px 40px;color:var(--muted);fon
   <div class="grid g3">
     <div class="card">
       <div class="stat">
-        <span class="label">Total Product</span>
+        <span class="label title">Total Product</span>
         <span class="value"><input class="cell-input num" id="ov-totalProduct" style="font-size:24px" placeholder="0"><small>T/day</small></span>
       </div>
       <p class="note" style="margin-top:6px">รวมยอดผลิตทั้งสองกะของวันนี้</p>
     </div>
     <div class="card">
       <div class="stat">
-        <span class="label">Critical Alarms วันนี้</span>
+        <span class="label title">Critical Alarms วันนี้</span>
         <span class="value" id="ov-alarmTotal">0 <small>รายการ</small></span>
       </div>
       <div class="legend" id="ov-alarmLeds"></div>
@@ -1527,7 +1528,7 @@ function renderNaoh(){
   const n = currentDay.naoh;
   document.getElementById('naohChecklist').innerHTML = `
     <div class="naoh-row">
-      <span class="naoh-label"><b>PM-901 high pressure (M)</b></span>
+      <span class="naoh-label"><b>PM-901 high pressure</b></span>
       <input class="cell-input mono naoh-time" id="naoh-batch-time" value="${esc(n.batch.time)}" placeholder="00:00">
     </div>
     <div class="naoh-row naoh-sub">
